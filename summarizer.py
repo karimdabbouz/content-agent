@@ -1,6 +1,7 @@
 from pydantic_ai import Agent
 from pydantic_ai.mcp import MCPServerHTTP
 from typing import List
+from schemas import InputText, OutputText
 
 
 class SummarizerAgent():
@@ -19,3 +20,13 @@ class SummarizerAgent():
             mcp_servers=self.servers,
             system_prompt=system_prompt
         )
+
+    
+    def run(self, input_texts: List[InputText]) -> OutputText:
+        '''
+        Runs the agent with a list of input texts. Returns the summarized text.
+
+        Args:
+            - input_texts: A list of InputText objects
+        '''
+        pass
