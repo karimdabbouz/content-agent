@@ -2,6 +2,10 @@ from pydantic_ai import Agent
 from pydantic_ai.mcp import MCPServerHTTP
 from typing import List
 from schemas import InputText, OutputText
+from dotenv import load_dotenv
+from pathlib import Path
+
+load_dotenv(dotenv_path=Path(__file__).parent / '.env')
 
 
 class SummarizerAgent():
@@ -17,7 +21,7 @@ class SummarizerAgent():
         self.servers = [MCPServerHTTP(x) for x in server_urls]
         self.agent = Agent(
             model_name,
-            mcp_servers=self.servers,
+            # mcp_servers=self.servers,
             system_prompt=system_prompt
         )
 
@@ -29,4 +33,5 @@ class SummarizerAgent():
         Args:
             - input_texts: A list of InputText objects
         '''
-        pass
+        test_input = 'Who are you in one sentence?'
+        print(self.agent.run_sync(test_input))
