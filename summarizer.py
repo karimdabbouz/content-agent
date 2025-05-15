@@ -1,5 +1,5 @@
 from pydantic_ai import Agent
-from pydantic_ai.mcp import MCPServerHTTP
+from pydantic_ai.mcp import MCPServerHTTP, MCPServerStdio
 from typing import List
 from schemas import InputText, OutputText
 from dotenv import load_dotenv
@@ -8,6 +8,22 @@ from pathlib import Path
 load_dotenv(dotenv_path=Path(__file__).parent / '.env')
 
 
+# from pydantic_ai.mcp import MCPServerStdio
+
+# server = MCPServerStdio(  
+#     'deno',
+#     args=[
+#         'run',
+#         '-N',
+#         '-R=node_modules',
+#         '-W=node_modules',
+#         '--node-modules-dir=auto',
+#         'jsr:@pydantic/mcp-run-python',
+#         'stdio',
+#     ]
+# )
+
+# MUSS STDIO UND HTTP GLEICHZEITIG AKZEPTIEREN
 class SummarizerAgent():
     '''
     The main agent implemented as an MCP client. Uses PydanticAI.
@@ -18,10 +34,10 @@ class SummarizerAgent():
         model_name: str,
         system_prompt: str
         ):
-        self.servers = [MCPServerHTTP(x) for x in server_urls]
+        self.servers = [MCPServerHTTP(x) for x in server_urls] if self.transport == 'stdio' else 'TODO'
         self.agent = Agent(
             model_name,
-            # mcp_servers=self.servers,
+            mcp_servers=self.servers,
             system_prompt=system_prompt
         )
 
@@ -34,4 +50,4 @@ class SummarizerAgent():
             - input_texts: A list of InputText objects
         '''
         test_input = 'Who are you in one sentence?'
-        print(self.agent.run_sync(test_input))
+        print(self.agent.run(test_input))

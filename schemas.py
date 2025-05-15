@@ -3,6 +3,13 @@ from typing import Optional, List
 import datetime
 
 
+class MCPServerConfigs(BaseModel):
+    '''
+    Configurations for MCP servers that can be either used for HTTP or Stdio transport.
+    '''
+    pass
+
+
 class InputTextMetadata(BaseModel):
     created_at: Optional[datetime.datetime] = None
     num_words: Optional[int] = None
