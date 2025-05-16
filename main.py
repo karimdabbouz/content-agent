@@ -1,5 +1,5 @@
 from summarizer import SummarizerAgent
-from schemas import InputText
+from schemas import InputText, MCPServerConfigs
 import argparse, json, os
 
 
@@ -22,9 +22,23 @@ if __name__ == '__main__':
             else:
                 with open(file_path, 'r', encoding='utf-8') as file:
                     input_data = [InputText.model_validate(x) for x in json.load(file)]
+                # agent = SummarizerAgent(
+                #     server_configs=MCPServerConfigs(
+                #         transport='http',
+                #         server_urls=['http://localhost:11434']
+                #     ),
+                #     model_name=args.model_name,
+                #     system_prompt=args.system_prompt
+                # )
                 agent = SummarizerAgent(
-                    server_urls=['http://localhost:11434'],
+                    server_configs=MCPServerConfigs(
+                        transport='stdio',
+                        stdio_commands=[
+                            ('python', ['-m', 'pydantic_ai.mcp.run', 'stdio', 'http://localhost:11434'])
+                        ]
+                    ),
                     model_name=args.model_name,
                     system_prompt=args.system_prompt
                 )
-                agent.run(input_data)
+                print(agent.agent)
+                # agent.run(input_data)

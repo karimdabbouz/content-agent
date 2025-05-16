@@ -1,7 +1,7 @@
 from pydantic_ai import Agent
 from pydantic_ai.mcp import MCPServerHTTP, MCPServerStdio
 from typing import List
-from schemas import InputText, OutputText
+from schemas import InputText, OutputText, MCPServerConfigs
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -23,21 +23,20 @@ load_dotenv(dotenv_path=Path(__file__).parent / '.env')
 #     ]
 # )
 
-# MUSS STDIO UND HTTP GLEICHZEITIG AKZEPTIEREN
+
 class SummarizerAgent():
     '''
     The main agent implemented as an MCP client. Uses PydanticAI.
     '''
     def __init__(
         self,
-        server_urls: List[str],
+        server_configs: MCPServerConfigs,
         model_name: str,
         system_prompt: str
         ):
-        self.servers = [MCPServerHTTP(x) for x in server_urls] if self.transport == 'stdio' else 'TODO'
         self.agent = Agent(
             model_name,
-            mcp_servers=self.servers,
+            mcp_servers=lambda: [MCPServerHTTP(x) for x in server_configs.server_urls] if server_configs.transport == 'http' else [MCPServerStdio(x[0], x[1]) for x in server_configs.stdio_commands],
             system_prompt=system_prompt
         )
 
