@@ -6,9 +6,11 @@ import argparse, json, os
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Summarize text')
+    # hier eine zweite action: chat, um zu testen nur oder brauche ich das wirklich?
+    # was ist mit memory eigentlich?
     parser.add_argument('action', choices=['summarize'], help='Action to perform')
     parser.add_argument('--model-name', default='openai:gpt-4o-mini', help='Model name')
-    parser.add_argument('--system-prompt', required=True, help='System prompt')
+    # parser.add_argument('--system-prompt', required=True, help='System prompt')
     args = parser.parse_args()
     
     if args.action == 'summarize':
