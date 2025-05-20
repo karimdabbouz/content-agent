@@ -1,20 +1,25 @@
 from summarizer import SummarizerAgent
 from schemas import InputText, MCPServerConfigs
 import argparse, json, os
-
+from system_prompts import summarize_system_prompt
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Summarize text')
-    # hier eine zweite action: chat, um zu testen nur oder brauche ich das wirklich?
-    # was ist mit memory eigentlich?
+    parser = argparse.ArgumentParser()
     parser.add_argument('action', choices=['summarize'], help='Action to perform')
-    parser.add_argument('--model-name', default='openai:gpt-4o-mini', help='Model name')
-    # parser.add_argument('--system-prompt', required=True, help='System prompt')
+    parser.add_argument('--model-name', default='openai:gpt-4o-mini', help='Model name') # in the webserver this will be set at startup
+    parser.add_argument('--mcp-servers', help='MCP servers as a list')
     args = parser.parse_args()
-    
+
     if args.action == 'summarize':
-        print('To exit, enter "exit"')
+        mcp_configs = MCPServerConfigs(**json.loads(args.mcp_servers))
+        # --mcp-servers '{"transport": "http", "server_urls": ["http://localhost:8000"]}'
+        # --mcp-servers '{"transport": "stdio", "stdio_commands": [["/usr/bin/mycmd", ["--arg1", "foo"]]]}'
+        agent = SummarizerAgent(
+            server_configs=mcp_configs,
+            model_name=args.model_name,
+            system_prompt=summarize_system_prompt
+        )
         while True:
             file_path = input('Enter the path to the input file. It should be a JSON with a list of InputText objects: ')
             if file_path == 'exit':
@@ -24,23 +29,40 @@ if __name__ == '__main__':
             else:
                 with open(file_path, 'r', encoding='utf-8') as file:
                     input_data = [InputText.model_validate(x) for x in json.load(file)]
-                # agent = SummarizerAgent(
-                #     server_configs=MCPServerConfigs(
-                #         transport='http',
-                #         server_urls=['http://localhost:11434']
-                #     ),
-                #     model_name=args.model_name,
-                #     system_prompt=args.system_prompt
-                # )
-                agent = SummarizerAgent(
-                    server_configs=MCPServerConfigs(
-                        transport='stdio',
-                        stdio_commands=[
-                            ('python', ['-m', 'pydantic_ai.mcp.run', 'stdio', 'http://localhost:11434'])
-                        ]
-                    ),
-                    model_name=args.model_name,
-                    system_prompt=args.system_prompt
-                )
-                print(agent.agent)
-                # agent.run(input_data)
+                user_prompt = input('What would you like me to do? ')
+                user_prompt = agent._construct_prompt(input_data, user_prompt)
+                print(user_prompt)
+
+
+
+#     if args.action == 'summarize':
+#         print('To exit, enter "exit"')
+#         while True:
+#             file_path = input('Enter the path to the input file. It should be a JSON with a list of InputText objects: ')
+#             if file_path == 'exit':
+#                 break
+#             elif not os.path.exists(file_path):
+#                 print('File does not exist. Please try again.')
+#             else:
+#                 with open(file_path, 'r', encoding='utf-8') as file:
+#                     input_data = [InputText.model_validate(x) for x in json.load(file)]
+#                 # agent = SummarizerAgent(
+#                 #     server_configs=MCPServerConfigs(
+#                 #         transport='http',
+#                 #         server_urls=['http://localhost:11434']
+#                 #     ),
+#                 #     model_name=args.model_name,
+#                 #     system_prompt=args.system_prompt
+#                 # )
+#                 agent = SummarizerAgent(
+#                     server_configs=MCPServerConfigs(
+#                         transport='stdio',
+#                         stdio_commands=[
+#                             ('python', ['-m', 'pydantic_ai.mcp.run', 'stdio', 'http://localhost:11434'])
+#                         ]
+#                     ),
+#                     model_name=args.model_name,
+#                     system_prompt=args.system_prompt
+#                 )
+#                 print(agent.agent)
+#                 # agent.run(input_data)

@@ -17,24 +17,12 @@ class SummarizerAgent():
         self,
         server_configs: MCPServerConfigs,
         model_name: str,
-        input_text_schema: str = json.dumps(InputText.model_json_schema(), indent=2),
-        output_text_schema: str = json.dumps(OutputText.model_json_schema(), indent=2)
+        system_prompt: str
         ):
-        self.system_prompt = '''Your job is to repurpose text into a new text depending on the user's request and a list of one or more input texts. Here are the rules:
-
-        1. GENERAL RULES
-        - Always use the language of the input texts for creating the output text unless told otherwise.
-        - 
-
-        2. FORMATS
-        - You will receive input as a list of InputText objects in the following format:
-        {input_text_schema}
-        - OUTPUT TYPE IS SET AS AN ARGUMENT IN THE AGENT BY PYDANTIC
-        '''
         self.agent = Agent(
             model_name,
             mcp_servers=lambda: [MCPServerHTTP(x) for x in server_configs.server_urls] if server_configs.transport == 'http' else [MCPServerStdio(x[0], x[1]) for x in server_configs.stdio_commands],
-            system_prompt=self.system_prompt
+            system_prompt=system_prompt
         )
 
 
@@ -51,10 +39,11 @@ class SummarizerAgent():
         Nimmt mir PydanticAI hier nicht Dinge ab eigentlich?
             -> nur system-prompt/instructions und output-type
         '''
-        inputs_json = json.dumps(InputText.model_json_schema(), indent=2)
         user_prompt = {
-            'user_prompt': user_prompt
+            'user_prompt': user_prompt,
+            'input_texts': [x.model_dump() for x in input_texts]
         }
+        return user_prompt
 
 
     def run(self, input_texts: List[InputText]) -> OutputText:
