@@ -1,10 +1,10 @@
+import json
 from pydantic_ai import Agent
 from pydantic_ai.mcp import MCPServerHTTP, MCPServerStdio
 from typing import List
 from schemas import InputText, OutputText, MCPServerConfigs
 from dotenv import load_dotenv
 from pathlib import Path
-import json
 
 load_dotenv(dotenv_path=Path(__file__).parent / '.env')
 
@@ -21,7 +21,7 @@ class SummarizerAgent():
         ):
         self.agent = Agent(
             model_name,
-            mcp_servers=lambda: [MCPServerHTTP(x) for x in server_configs.server_urls] if server_configs.transport == 'http' else [MCPServerStdio(x[0], x[1]) for x in server_configs.stdio_commands],
+            # mcp_servers=lambda: [MCPServerHTTP(x) for x in server_configs.server_urls] if server_configs.transport == 'http' else [MCPServerStdio(x[0], x[1]) for x in server_configs.stdio_commands],
             system_prompt=system_prompt
         )
 
@@ -43,15 +43,14 @@ class SummarizerAgent():
             'user_prompt': user_prompt,
             'input_texts': [x.model_dump() for x in input_texts]
         }
-        return user_prompt
+        return json.dumps(user_prompt, indent=2, default=str)
 
 
-    def run(self, input_texts: List[InputText]) -> OutputText:
+    def run(self, user_prompt: str): # add output type later
         '''
         Runs the agent with a list of input texts. Returns the summarized text.
 
         Args:
-            - input_texts: A list of InputText objects
+            - user_prompt: The user prompt (instructions plus input texts)
         '''
-        test_input = 'Who are you in one sentence?'
-        print(self.agent.run(test_input))
+        return self.agent.run_sync(user_prompt)
