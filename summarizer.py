@@ -22,7 +22,8 @@ class SummarizerAgent():
         self.agent = Agent(
             model_name,
             # mcp_servers=lambda: [MCPServerHTTP(x) for x in server_configs.server_urls] if server_configs.transport == 'http' else [MCPServerStdio(x[0], x[1]) for x in server_configs.stdio_commands],
-            system_prompt=system_prompt
+            system_prompt=system_prompt,
+            output_type=OutputText
         )
 
 
