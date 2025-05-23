@@ -1,10 +1,11 @@
 import json
 from pydantic_ai import Agent
 from pydantic_ai.mcp import MCPServerHTTP, MCPServerStdio
-from typing import List
-from schemas import InputText, OutputText, MCPServerConfigs
+from typing import List, Optional
+from schemas import InputText, OutputText, MCPServerConfig
 from dotenv import load_dotenv
 from pathlib import Path
+
 
 load_dotenv(dotenv_path=Path(__file__).parent / '.env')
 
@@ -15,16 +16,23 @@ class SummarizerAgent():
     '''
     def __init__(
         self,
-        server_configs: MCPServerConfigs,
+        server_configs: Optional[List[MCPServerConfig]],
         model_name: str,
         system_prompt: str
-        ):
-        self.agent = Agent(
-            model_name,
-            # mcp_servers=lambda: [MCPServerHTTP(x) for x in server_configs.server_urls] if server_configs.transport == 'http' else [MCPServerStdio(x[0], x[1]) for x in server_configs.stdio_commands],
-            system_prompt=system_prompt,
-            output_type=OutputText
-        )
+    ):
+        if server_configs is not None:
+            self.agent = Agent(
+                model_name,
+                mcp_servers=lambda: [MCPServerHTTP(x.connection) if x.transport == 'http' else MCPServerStdio(x.connection[0], x.connection[1]) for x in server_configs],
+                system_prompt=system_prompt,
+                output_type=OutputText
+            )
+        else:
+            self.agent = Agent(
+                model_name,
+                system_prompt=system_prompt,
+                output_type=OutputText
+            )
 
 
     def get_system_prompt(self):
