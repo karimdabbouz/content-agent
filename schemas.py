@@ -45,3 +45,8 @@ class OutputText(BaseModel):
     headline: Optional[str] = None
     teaser: Optional[str] = None
     body: List[Paragraph]
+
+
+class SummarizeRequest(BaseModel):
+    input_texts: List[InputText]
+    user_prompt: str

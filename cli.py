@@ -29,8 +29,8 @@ if __name__ == '__main__':
             else:
                 with open(file_path, 'r', encoding='utf-8') as file:
                     input_data = [InputText.model_validate(x) for x in json.load(file)]
-                user_input = input('What would you like me to do? ')
-                user_prompt = agent._construct_prompt(input_data, user_input)
+                user_prompt = input('What would you like me to do? ')
+                user_prompt = agent._construct_prompt(input_data, user_prompt)
                 response = agent.run(user_prompt)
                 print(response)
                 print(response.all_messages())
