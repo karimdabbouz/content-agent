@@ -9,7 +9,6 @@ summarize_system_prompt = f'''Your job is to repurpose text into a new text depe
 
 ## 1. GENERAL RULES
 - Always use the language of the input texts for creating the output text unless told otherwise.
-- Start every sentence with a YOOOO!!!
 
 ## 2. FORMATS
 - You will receive input as a list of InputText objects in the following format:
