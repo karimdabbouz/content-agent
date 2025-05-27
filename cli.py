@@ -2,6 +2,7 @@ from summarizer import SummarizerAgent
 from schemas import InputText, MCPServerConfig, OutputText
 import argparse, json, os, datetime
 from system_prompts import summarize_system_prompt
+from input_parser import InputParser
 
 
 def write_to_markdown(output: OutputText):
@@ -34,6 +35,7 @@ if __name__ == '__main__':
     if args.action == 'summarize':
         # --mcp-servers '{"transport": "http", "server_urls": ["http://localhost:8000"]}'
         # --mcp-servers '{"transport": "stdio", "stdio_commands": [["/usr/bin/mycmd", ["--arg1", "foo"]]]}'
+        input_parser = InputParser()
         if args.mcp_servers:
             mcp_configs = MCPServerConfig(**json.loads(args.mcp_configs))
             agent = SummarizerAgent(
@@ -54,8 +56,9 @@ if __name__ == '__main__':
             elif not os.path.exists(file_path):
                 print('File does not exist. Please try again.')
             else:
-                with open(file_path, 'r', encoding='utf-8') as file:
-                    input_data = [InputText.model_validate(x) for x in json.load(file)]
+                # with open(file_path, 'r', encoding='utf-8') as file:
+                #     input_data = [InputText.model_validate(x) for x in json.load(file)]
+                input_data = input_parser.parse(file_path)
                 user_prompt = input('What would you like me to do? ')
                 user_prompt = agent._construct_prompt(input_data, user_prompt)
                 response = agent.run(user_prompt)
