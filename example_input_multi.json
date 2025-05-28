@@ -1,0 +1,47 @@
+[
+    {
+        "metadata": {
+            "created_at": "2024-06-01T10:00:00",
+            "num_words": 120
+        },
+        "headline": "Shannon's Information Theory",
+        "teaser": "A brief overview of Claude Shannon's groundbreaking work.",
+        "body": [
+            {
+                "subheadline": "Background",
+                "text": "Claude Shannon introduced information theory in 1948, laying the foundation for digital communication."
+            },
+            {
+                "subheadline": "Impact",
+                "text": "Shannon's work enabled the development of efficient coding and data transmission methods."
+            }
+        ]
+    },
+    {
+        "metadata": {
+            "created_at": "2024-06-02T09:30:00",
+            "num_words": 80
+        },
+        "headline": "Entropy in Communication",
+        "teaser": "Understanding the role of entropy in measuring information.",
+        "body": [
+            {
+                "subheadline": null,
+                "text": "Entropy quantifies the unpredictability in a message, helping optimize encoding schemes."
+            }
+        ]
+    },
+    {
+        "metadata": {
+            "created_at": "2024-06-03T08:15:00",
+            "num_words": 50
+        },
+        "headline": null,
+        "teaser": null,
+        "body": [
+            {
+                "text": "Information theory is essential for modern data science and telecommunications."
+            }
+        ]
+    }
+] 

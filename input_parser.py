@@ -23,14 +23,52 @@ class InputParser:
                 return [InputText.model_validate(input_data)]
         except json.JSONDecodeError:
             raise ValueError('Invalid JSON string')
+        
+
+    def _parse_markdown(self, input_string: str) -> list[InputText]:
+        '''
+        Parses input data from a markdown string.
+        '''
+        return []
+    
+
+    def _parse_text(self, input_string: str) -> list[InputText]:
+        '''
+        Parses input data from a text string.
+        '''
+        return []
 
 
     def parse(self, file_path: str) -> list[InputText]:
         '''
         Runs the input parser based on the input type.
+
+        Args:
+            - file_path: The path to the input file. Either a file or a directory.
         '''
-        with open(file_path, 'r', encoding='utf-8') as file:
-            if file_path.endswith('.json'):
-                return self._parse_json(file.read())
-            else:
-                raise ValueError('Unsupported file type')
+        if os.path.isfile(file_path):
+            with open(file_path, 'r', encoding='utf-8') as file:
+                if file_path.endswith('.json'):
+                    return self._parse_json(file.read())
+                elif file_path.endswith('.md'):
+                    return self._parse_markdown(file.read())
+                elif file_path.endswith('.txt'):
+                    return self._parse_text(file.read())
+                else:
+                    raise ValueError('Unsupported file type')
+        else:
+            input_texts = []
+            for entry in os.listdir(file_path):
+                full_path = os.path.join(file_path, entry)
+                if not os.path.isfile(full_path):
+                    continue
+                with open(full_path, 'r', encoding='utf-8') as file:
+                    if entry.endswith('.json'):
+                        input_texts.extend(self._parse_json(file.read()))
+                    elif entry.endswith('.md'):
+                        input_texts.extend(self._parse_markdown(file.read()))
+                    elif entry.endswith('.txt'):
+                        input_texts.extend(self._parse_text(file.read()))
+                    else:
+                        continue
+            return input_texts
