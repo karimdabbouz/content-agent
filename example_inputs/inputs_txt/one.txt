@@ -1,0 +1,1 @@
+Entropy, a term borrowed from thermodynamics, plays a central role in information theory. Introduced by Claude Shannon in his seminal 1948 paper, entropy measures the average amount of information produced by a stochastic source of data. In simple terms, it quantifies the uncertainty or unpredictability associated with a random variable or a set of possible messages.

@@ -1,5 +1,5 @@
 import os, json
-from schemas import InputText
+from schemas import InputText, InputTextMetadata, Paragraph
 
 
 class InputParser:
@@ -36,7 +36,12 @@ class InputParser:
         '''
         Parses input data from a text string.
         '''
-        return []
+        return [
+            InputText(
+                metadata=InputTextMetadata(),
+                body=[Paragraph(text=input_string)]
+            )
+        ]
 
 
     def parse(self, file_path: str) -> list[InputText]:
