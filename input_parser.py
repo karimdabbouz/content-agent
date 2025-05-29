@@ -29,7 +29,65 @@ class InputParser:
         '''
         Parses input data from a markdown string.
         '''
-        return []
+        headline = None
+        paragraphs = []
+        current_subheadline = None
+        current_text = []
+        for line in input_string.splitlines():
+            if line.startswith('# '):
+                headline = line[2:].strip()
+            elif line.startswith('## '):
+                if current_text:
+                    paragraphs.append(
+                        Paragraph(
+                            subheadline=current_subheadline,
+                            text='\n'.join(current_text).strip()
+                        )
+                    )
+                    current_text = []
+                current_subheadline = line[3:].strip()
+            elif line.strip() == '':
+                if current_text:
+                    paragraphs.append(
+                        Paragraph(
+                            subheadline=current_subheadline,
+                            text='\n'.join(current_text).strip()
+                        )
+                    )
+                    current_text = []
+                    current_subheadline = None
+            else:
+                current_text.append(line)
+        # Add any remaining text as a paragraph
+        if current_text:
+            paragraphs.append(
+                Paragraph(
+                    subheadline=current_subheadline,
+                    text='\n'.join(current_text).strip()
+                )
+            )
+        return [
+            InputText(
+                metadata=InputTextMetadata(),
+                headline=headline,
+                body=paragraphs
+            )
+        ]
+
+
+    # output_file = f'./outputs/{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.md'
+    # lines = []
+    # if output.headline:
+    #     lines.append(f'# {output.headline}\n')
+    # if output.teaser:
+    #     lines.append(f'*{output.teaser}*\n')
+    # for paragraph in output.body:
+    #     if paragraph.subheadline:
+    #         lines.append(f'## {paragraph.subheadline}\n')
+    #     lines.append(f'{paragraph.text}\n')
+    # with open(output_file, 'w', encoding='utf-8') as file:
+    #     file.writelines(lines)
+
     
 
     def _parse_text(self, input_string: str) -> list[InputText]:

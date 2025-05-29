@@ -50,11 +50,11 @@ if __name__ == '__main__':
                 system_prompt=summarize_system_prompt
             )
         while True:
-            file_path = input('Enter the path to the input file. It should be a JSON with a list of InputText objects: ')
+            file_path = input('Enter the path to the input file or directory of files:')
             if file_path == 'exit':
                 break
             elif not os.path.exists(file_path):
-                print('File does not exist. Please try again.')
+                print('File or directory does not exist. Please try again.')
             else:
                 # with open(file_path, 'r', encoding='utf-8') as file:
                 #     input_data = [InputText.model_validate(x) for x in json.load(file)]
