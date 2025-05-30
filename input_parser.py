@@ -73,21 +73,6 @@ class InputParser:
                 body=paragraphs
             )
         ]
-
-
-    # output_file = f'./outputs/{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.md'
-    # lines = []
-    # if output.headline:
-    #     lines.append(f'# {output.headline}\n')
-    # if output.teaser:
-    #     lines.append(f'*{output.teaser}*\n')
-    # for paragraph in output.body:
-    #     if paragraph.subheadline:
-    #         lines.append(f'## {paragraph.subheadline}\n')
-    #     lines.append(f'{paragraph.text}\n')
-    # with open(output_file, 'w', encoding='utf-8') as file:
-    #     file.writelines(lines)
-
     
 
     def _parse_text(self, input_string: str) -> list[InputText]:

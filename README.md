@@ -7,5 +7,5 @@ I want this to be as flexible and modular as possible in order to be able to int
 An agent can be seen as a combination of MCP servers for input and/or output and a system prompt. Hence, agents will be created at startup of the webserver and can then be used through their respective endpoints. They will live in memory and can be altered at runtime through the API. This should work for a small number of agents (running MCP servers is another story, but they will most likely be used by multiple agents anyway). Actions in the CLI app correspond to API endpoints I will later build to use different agents remotely. Cool.
 
 - [x] Parse in txt or md file
-- [ ] Dynamically create API endpoint for agent (combination of system prompt and tools)
+- [x] Dynamically create API endpoint for agent (combination of system prompt and tools)
 - [ ] Add method to parse input into InputText schema
