@@ -22,7 +22,7 @@ The CLI tool is located in `cli.py` and allows you to summarize or repurpose tex
 Run the CLI with:
 
 ```bash
-python -m summarizer-agent.cli summarize [--model-name MODEL] [--mcp-servers JSON] [--write-to-file True|False]
+python summarizer-agent/cli.py summarize [--model-name MODEL] [--mcp-servers JSON] [--write-to-file True|False]
 ```
 
 - `action` (required): Currently only `summarize` is supported.
@@ -45,7 +45,7 @@ python -m summarizer-agent.cli summarize [--model-name MODEL] [--mcp-servers JSO
 
 - Summarize a single file and print output:
   ```bash
-  python -m summarizer-agent.cli summarize --model-name openai:gpt-4o-mini
+  python summarizer-agent/cli.py summarize --model-name openai:gpt-4o-mini
   # Then follow the prompts, e.g.:
   # Enter the path to the input file or directory of files: example_inputs/example_input.txt
   # What would you like me to do? Summarize this text in 3 bullet points.
@@ -53,21 +53,21 @@ python -m summarizer-agent.cli summarize [--model-name MODEL] [--mcp-servers JSO
 
 - Summarize all `.txt` files in a directory and save output:
   ```bash
-  python -m summarizer-agent.cli summarize --write-to-file True
+  python summarizer-agent/cli.py summarize --write-to-file True
   # Enter: example_inputs/inputs_txt
   # Enter your prompt as above
   ```
 
 - Use a JSON input file:
   ```bash
-  python -m summarizer-agent.cli summarize
+  python summarizer-agent/cli.py summarize
   # Enter: example_inputs/example_input.json
   # Enter your prompt
   ```
 
 - Use an MCP server (advanced):
   ```bash
-  python -m summarizer-agent.cli summarize --mcp-servers '{"transport": "http", "connection": "http://localhost:8000"}'
+  python summarizer-agent/cli.py summarize --mcp-servers '{"transport": "http", "connection": "http://localhost:8000"}'
   ```
 
 #### Example Input Files
