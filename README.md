@@ -7,67 +7,80 @@ I want this to be as flexible and modular as possible in order to be able to int
 An agent can be seen as a combination of MCP servers for input and/or output and a system prompt. Hence, agents will be created at startup of the webserver and can then be used through their respective endpoints. They will live in memory and can be altered at runtime through the API. This should work for a small number of agents (running MCP servers is another story, but they will most likely be used by multiple agents anyway). Actions in the CLI app correspond to API endpoints I will later build to use different agents remotely. Cool.
 
 - [x] Parse in txt or md file
-- [x] Dynamically create API endpoint for agent (combination of system prompt and tools)
-- [ ] Add method to parse input into InputText schema
+- [ ] Dynamically create API endpoint for agent (combination of system prompt and tools)
+- [x] Add methods to parse input into InputText schema
+- [ ] Add new CLI action for creating pillar content from either input texts or search terms with research capability (i.e. with Firecrawl)
 
 
 ## How to Use
 
 ### CLI
 
-The CLI tool is located in `cli.py` and allows you to summarize or repurpose text files using the Summarizer Agent. It supports `.txt`, `.md`, and `.json` input files, as well as directories containing multiple files.
+The CLI tool is located in `cli.py` and allows you to work with text from files or web searches using the Summarizer Agent. It supports `.txt`, `.md`, and `.json` input files, as well as directories containing multiple files.
 
 #### Basic Usage
 
 Run the CLI with:
 
 ```bash
-python summarizer-agent/cli.py summarize [--model-name MODEL] [--mcp-servers JSON] [--write-to-file True|False]
+python summarizer-agent/cli.py [action] [--model-name MODEL] [--mcp-servers JSON] [--write-to-file True|False]
 ```
 
-- `action` (required): Currently only `summarize` is supported.
-- `--model-name`: (optional) The model to use (default: `openai:gpt-4o-mini`).
-- `--mcp-servers`: (optional) JSON string for MCP server config. Example: `'{"transport": "http", "connection": "http://localhost:8000"}'`
+- `action` (required): Choose between `from-file` or `from-web`
+- `--model-name`: (optional) The model to use (default: `openai:gpt-4o-mini`)
+- `--mcp-servers`: (optional) JSON string for MCP server config. Can be a single config or an array of configs:
+  ```bash
+  # Single server
+  --mcp-servers '{"transport": "http", "connection": "http://localhost:8000"}'
+  
+  # Multiple servers
+  --mcp-servers '[{"transport": "http", "connection": "http://localhost:8000"}, {"transport": "stdio", "connection": ["/usr/bin/firecrawl", ["--arg1", "foo"]]}]'
+  ```
 - `--write-to-file`: (optional) If set to `True`, output will be saved as a markdown file in the `outputs/` directory. Otherwise, output is printed to the console.
+
+#### Actions
+
+##### from-file
+Work with text from one or more files:
+```bash
+python summarizer-agent/cli.py from-file --file-path PATH [--model-name MODEL] [--mcp-servers JSON] [--write-to-file True|False]
+```
+
+- `--file-path`: (required) Path to the input file or directory. Supported formats:
+  - `.txt`: Plain text
+  - `.md`: Markdown
+  - `.json`: List of InputText objects (see `example_inputs/example_input.json`)
+  - Directory: All supported files inside will be processed
+
+##### from-web
+Work with text gathered from a web search (coming soon):
+```bash
+python summarizer-agent/cli.py from-web [--model-name MODEL] [--mcp-servers JSON] [--write-to-file True|False]
+```
 
 #### Interactive Workflow
 
-1. You will be prompted to enter the path to an input file or directory. Supported formats:
-   - `.txt`: Plain text
-   - `.md`: Markdown
-   - `.json`: List of InputText objects (see `example_inputs/example_input.json`)
-   - Directory: All supported files inside will be processed
-2. Enter your prompt describing what you want the agent to do (e.g., "Summarize these articles as a newsletter").
-3. The agent will process the input and display or save the output.
-4. Type `exit` to quit the CLI.
+1. After starting the CLI with the appropriate action and arguments, you'll be prompted to enter your instructions.
+2. The agent will process your request and display or save the output.
+3. Type `exit` to quit the CLI.
 
 #### Example Commands
 
-- Summarize a single file and print output:
+- Work with a single file:
   ```bash
-  python summarizer-agent/cli.py summarize --model-name openai:gpt-4o-mini
-  # Then follow the prompts, e.g.:
-  # Enter the path to the input file or directory of files: example_inputs/example_input.txt
+  python summarizer-agent/cli.py from-file --file-path example_inputs/example_input.txt
+  # Then enter your prompt, e.g.:
   # What would you like me to do? Summarize this text in 3 bullet points.
   ```
 
-- Summarize all `.txt` files in a directory and save output:
+- Work with all files in a directory and save output:
   ```bash
-  python summarizer-agent/cli.py summarize --write-to-file True
-  # Enter: example_inputs/inputs_txt
-  # Enter your prompt as above
+  python summarizer-agent/cli.py from-file --file-path example_inputs/inputs_txt --write-to-file True
   ```
 
-- Use a JSON input file:
+- Use with an MCP server:
   ```bash
-  python summarizer-agent/cli.py summarize
-  # Enter: example_inputs/example_input.json
-  # Enter your prompt
-  ```
-
-- Use an MCP server (advanced):
-  ```bash
-  python summarizer-agent/cli.py summarize --mcp-servers '{"transport": "http", "connection": "http://localhost:8000"}'
+  python summarizer-agent/cli.py from-file --file-path example_inputs/example_input.txt --mcp-servers '{"transport": "http", "connection": "http://localhost:8000"}'
   ```
 
 #### Example Input Files

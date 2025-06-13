@@ -1,7 +1,7 @@
 from summarizer import SummarizerAgent
 from schemas import InputText, MCPServerConfig, OutputText
 import argparse, json, os, datetime
-from system_prompts import summarize_system_prompt
+from system_prompts import summarize_system_prompt, from_file_system_prompt
 from input_parser import InputParser
 
 
@@ -26,22 +26,33 @@ def write_to_markdown(output: OutputText):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('action', choices=['summarize'], help='Action to perform')
-    parser.add_argument('--model-name', default='openai:gpt-4o-mini', help='Model name') # in the webserver this will be set at startup
-    parser.add_argument('--mcp-servers', help='MCP servers as a list')
-    parser.add_argument('--write-to-file', default=False, help='True if you want to write the output to a file')
+    parser.add_argument('--model-name', default='openai:gpt-4o-mini', help='Model name. Default is 4o-mini')
+    parser.add_argument('--write-to-file', default=False, help='Set to True to write outputs to md files. Otherwise output will be printed to console.')
+    
+    subparsers = parser.add_subparsers(dest='action', required=True)
+
+    # from-file
+    from_file_parser = subparsers.add_parser('from-file', help='Work with text from one or more files')
+    from_file_parser.add_argument('--file-path', required=True, help='Path to the input file or directory')
+
+    # from-web
+    from_web_parser = subparsers.add_parser('from-web', help='Work with text gathered from a web search')
+
     args = parser.parse_args()
 
-    if args.action == 'summarize':
+    if args.action == 'from-file':
         # --mcp-servers '{"transport": "http", "server_urls": ["http://localhost:8000"]}'
+        # --mcp-servers '[{"transport": "http", "connection": "http://localhost:8000"}, {"transport": "stdio", "connection": ["/usr/bin/firecrawl", ["--arg1", "foo"]]}]'
         # --mcp-servers '{"transport": "stdio", "stdio_commands": [["/usr/bin/mycmd", ["--arg1", "foo"]]]}'
         input_parser = InputParser()
+        input_data = input_parser.parse(args.file_path)
         if args.mcp_servers:
-            mcp_configs = MCPServerConfig(**json.loads(args.mcp_configs))
+            servers_list = json.loads(args.mcp_servers)
+            mcp_configs = [MCPServerConfig(**server) for server in servers_list]
             agent = SummarizerAgent(
                 server_configs=mcp_configs,
                 model_name=args.model_name,
-                system_prompt=summarize_system_prompt
+                system_prompt=from_file_system_prompt
             )
         else:
             agent = SummarizerAgent(
@@ -50,19 +61,14 @@ if __name__ == '__main__':
                 system_prompt=summarize_system_prompt
             )
         while True:
-            file_path = input('Enter the path to the input file or directory of files:')
-            if file_path == 'exit':
+            user_prompt = input('What would you like me to do? ')
+            if user_prompt.strip().lower() == 'exit':
                 break
-            elif not os.path.exists(file_path):
-                print('File or directory does not exist. Please try again.')
+            user_prompt_full = agent._construct_prompt(input_data, user_prompt)
+            response = agent.run(user_prompt_full)
+            if args.write_to_file:
+                write_to_markdown(response.output)
             else:
-                # with open(file_path, 'r', encoding='utf-8') as file:
-                #     input_data = [InputText.model_validate(x) for x in json.load(file)]
-                input_data = input_parser.parse(file_path)
-                user_prompt = input('What would you like me to do? ')
-                user_prompt = agent._construct_prompt(input_data, user_prompt)
-                response = agent.run(user_prompt)
-                if args.write_to_file:
-                    write_to_markdown(response.output)
-                else:
-                    print(response.output)
+                print(response.output)
+    elif args.action == 'from-web':
+        pass
