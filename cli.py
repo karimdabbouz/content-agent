@@ -1,7 +1,7 @@
 from summarizer import SummarizerAgent
 from schemas import InputText, MCPServerConfig, OutputText
 import argparse, json, os, datetime
-from system_prompts import summarize_system_prompt, from_file_system_prompt
+from system_prompts import from_file_system_prompt
 from input_parser import InputParser
 
 
@@ -58,7 +58,7 @@ if __name__ == '__main__':
             agent = SummarizerAgent(
                 server_configs=None,
                 model_name=args.model_name,
-                system_prompt=summarize_system_prompt
+                system_prompt=from_file_system_prompt
             )
         while True:
             user_prompt = input('What would you like me to do? ')
