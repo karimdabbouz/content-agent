@@ -10,7 +10,11 @@ def write_to_markdown(output: OutputText):
     Only used in cli at this moment.
     Takes the OutputText object and writes it to an markdown file in the output directory.
     '''
-    output_file = f'./outputs/{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.md'
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    outputs_dir = os.path.join(script_dir, 'outputs')
+    os.makedirs(outputs_dir, exist_ok=True)
+    
+    output_file = os.path.join(outputs_dir, f'{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.md')
     lines = []
     if output.headline:
         lines.append(f'# {output.headline}\n')
@@ -27,7 +31,8 @@ def write_to_markdown(output: OutputText):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--model-name', default='openai:gpt-4o-mini', help='Model name. Default is 4o-mini')
-    parser.add_argument('--write-to-file', default=False, help='Set to True to write outputs to md files. Otherwise output will be printed to console.')
+    parser.add_argument('--write-to-file', action='store_true', help='Write outputs to md files. If not set, output will be printed to console.')
+    parser.add_argument('--mcp-servers', default=None, help='A list of mcp server configurations (see docs)')
     
     subparsers = parser.add_subparsers(dest='action', required=True)
 

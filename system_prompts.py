@@ -9,8 +9,9 @@ output_text_schema = json.dumps(OutputText.model_json_schema(), indent=2)
 from_file_system_prompt = f'''Your job is to repurpose one or more texts into a new text depending on the user's request. Here are the rules:
 
 ## 1. GENERAL RULES
-- Always use the language of the input texts for creating the output text unless told otherwise
-- Pay attention to additional user instructions on style, format, length, etc. of the output to generate. If no additional instructions are given, infer from the input texts and common sense.
+- Always use the language of the input texts for creating the output text unless told otherwise.
+- The resulting text must have the length given to you by the users instructions.
+- Pay attention to additional user instructions on style, format, etc. of the output to generate. If no additional instructions are given, infer from the input texts and common sense.
 
 ## 2.FORMATS
 - You will receive input as a list of InputText objects in the following format:
