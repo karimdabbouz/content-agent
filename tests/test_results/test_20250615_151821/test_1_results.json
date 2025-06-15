@@ -1,0 +1,55 @@
+{
+  "input_texts": [
+    {
+      "metadata": {
+        "created_at": "2024-06-01T12:00:00",
+        "num_words": 400
+      },
+      "headline": "Understanding Entropy in Information Theory",
+      "teaser": "Entropy is a foundational concept in information theory, quantifying the unpredictability or information content in a message.",
+      "body": [
+        {
+          "subheadline": "Introduction",
+          "text": "Entropy, a term borrowed from thermodynamics, plays a central role in information theory. Introduced by Claude Shannon in his seminal 1948 paper, entropy measures the average amount of information produced by a stochastic source of data. In simple terms, it quantifies the uncertainty or unpredictability associated with a random variable or a set of possible messages."
+        },
+        {
+          "subheadline": "Defining Entropy",
+          "text": "Mathematically, the entropy H(X) of a discrete random variable X with possible values {x1, x2, ..., xn} and probability mass function P(X) is defined as H(X) = -Σ P(x) log₂ P(x), where the sum is over all possible values of X. This formula captures the expected value of the information contained in each possible outcome. If all outcomes are equally likely, entropy is maximized, indicating maximum uncertainty. Conversely, if one outcome is certain, entropy is zero, reflecting no uncertainty."
+        },
+        {
+          "subheadline": "Significance in Communication",
+          "text": "In the context of communication systems, entropy provides a theoretical limit on the best possible lossless compression of any communication. It tells us the minimum number of bits needed, on average, to encode a string of symbols based on their probabilities. For example, in English text, certain letters like 'e' are more common than others, so efficient encoding schemes assign shorter codes to frequent letters and longer codes to rare ones, reducing the average message length."
+        },
+        {
+          "subheadline": "Applications and Broader Impact",
+          "text": "Beyond data compression, entropy is used in cryptography, machine learning, and statistical inference. In cryptography, higher entropy in keys or messages means greater unpredictability and security. In machine learning, entropy is used to measure the impurity of datasets and guide decision tree algorithms. The concept also extends to continuous variables and other domains, making it a versatile and powerful tool in understanding and managing information."
+        }
+      ]
+    }
+  ],
+  "system_prompt": "Your job is to repurpose one or more texts into a new text depending on the user's request. Here are the rules:\n\n## 1. GENERAL RULES\n- Always use the language of the input texts for creating the output text unless told otherwise.\n- The resulting text must have the length given to you by the users instructions.\n- Pay attention to additional user instructions on style, format, etc. of the output to generate. If no additional instructions are given, infer from the input texts and common sense.\n\n## 2.FORMATS\n- You will receive input as a list of InputText objects in the following format:\n```json\n{\n  \"$defs\": {\n    \"InputTextMetadata\": {\n      \"properties\": {\n        \"created_at\": {\n          \"anyOf\": [\n            {\n              \"format\": \"date-time\",\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"default\": null,\n          \"title\": \"Created At\"\n        },\n        \"num_words\": {\n          \"anyOf\": [\n            {\n              \"type\": \"integer\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"default\": null,\n          \"title\": \"Num Words\"\n        }\n      },\n      \"title\": \"InputTextMetadata\",\n      \"type\": \"object\"\n    },\n    \"Paragraph\": {\n      \"properties\": {\n        \"subheadline\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"default\": null,\n          \"title\": \"Subheadline\"\n        },\n        \"text\": {\n          \"title\": \"Text\",\n          \"type\": \"string\"\n        }\n      },\n      \"required\": [\n        \"text\"\n      ],\n      \"title\": \"Paragraph\",\n      \"type\": \"object\"\n    }\n  },\n  \"properties\": {\n    \"metadata\": {\n      \"$ref\": \"#/$defs/InputTextMetadata\"\n    },\n    \"headline\": {\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ],\n      \"default\": null,\n      \"title\": \"Headline\"\n    },\n    \"teaser\": {\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ],\n      \"default\": null,\n      \"title\": \"Teaser\"\n    },\n    \"body\": {\n      \"items\": {\n        \"$ref\": \"#/$defs/Paragraph\"\n      },\n      \"title\": \"Body\",\n      \"type\": \"array\"\n    }\n  },\n  \"required\": [\n    \"metadata\",\n    \"body\"\n  ],\n  \"title\": \"InputText\",\n  \"type\": \"object\"\n}\n```\n",
+  "user_prompt": "Summarize in one sentence",
+  "metrics": {
+    "input_tokens": 539,
+    "input_words": 349,
+    "output_tokens": 87,
+    "output_words": 55
+  },
+  "settings": {
+    "model_name": "openai:gpt-4o-mini",
+    "response_tokens_limit": null,
+    "max_completion_tokens": null,
+    "temperature": 0.7,
+    "user_prompt": "Summarize in one sentence"
+  },
+  "output": {
+    "headline": "Understanding Entropy in Information Theory",
+    "teaser": "Entropy is a foundational concept in information theory, quantifying the unpredictability or information content in a message.",
+    "body": [
+      {
+        "subheadline": null,
+        "text": "Entropy, a key concept introduced by Claude Shannon, quantifies the unpredictability of information in communication systems and has broad applications in data compression, cryptography, and machine learning."
+      }
+    ]
+  }
+}
