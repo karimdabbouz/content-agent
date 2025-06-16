@@ -13,10 +13,15 @@ from_file_system_prompt = f'''Your job is to repurpose one or more texts into a 
 - The resulting text must have the length given to you by the users instructions.
 - Pay attention to additional user instructions on style, format, etc. of the output to generate. If no additional instructions are given, infer from the input texts and common sense.
 
-## 2.FORMATS
-- You will receive input as a list of InputText objects in the following format:
+## 2. FORMATS
+- You will receive input in the following format:
 ```json
-{input_text_schema}
+{{
+  "user_prompt": "string containing the user's specific request",
+  "input_texts": [
+    {input_text_schema}
+  ]
+}}
 ```
 '''
 
