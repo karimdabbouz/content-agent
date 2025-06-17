@@ -1,5 +1,6 @@
 import json
 import sys
+import time
 from pathlib import Path
 from pydantic_ai import Agent
 import tiktoken
@@ -39,7 +40,7 @@ def test_scenario(scenario_name, agent_kwargs, user_prompt):
     """Run a single test scenario"""
     # Load input
     parser = InputParser()
-    input_texts = parser.parse('example_inputs/example_input.json')
+    input_texts = parser.parse('example_inputs/inputs/buergeramt-pillar')
     
     # Create the prompt that will be sent to the model
     full_prompt = {
@@ -83,27 +84,64 @@ def test_scenario(scenario_name, agent_kwargs, user_prompt):
                 'output_tokens': output_tokens,
                 'output_words': output_words
             }
-        }, f, indent=2, default=str)
+        }, f, indent=2, default=str, ensure_ascii=False)
     
     with open(f'test_results/{scenario_name}.json', 'a') as f:
         f.write('\n\n--- MODEL OUTPUT ---\n\n')
-        json.dump(response.output.model_dump(), f, indent=2)
+        json.dump(response.output.model_dump(), f, indent=2, ensure_ascii=False)
     
     print(f"Completed scenario: {scenario_name}")
     print(f"Input: {input_words} words, {input_tokens} tokens")
     print(f"Output: {output_words} words, {output_tokens} tokens")
 
 def main():
-    # This is what we actually want to test
-    # user_prompt = "I want you to create a very long and detailed seo content piece from the input texts. The resulting text should serve as a pillar content piece and be in German. It should take all the information from the input texts and use it to deliver as much and as dense information as possible. The text must have 1000 words and be very detailed."
-    user_prompt = 'summarize in one sentence'
+    user_prompt = "I want you to create a very long and detailed seo content piece from the input texts. The resulting text should serve as a pillar content piece and be in German. It should take all the information from the input texts and use it to deliver as much and as dense information as possible. The text must have 1000 words and be very detailed."
     
-    # Test 1: No limits at all (to see the baseline)
-    test_scenario("test_1_no_limits", {
-        'model': 'openai:gpt-4o-mini',
-        'system_prompt': from_file_system_prompt,
-        'output_type': OutputText
-    }, user_prompt)
+    # Test different configurations without assumptions about what they do
+    test_configs = [
+        # ("openai_baseline_no_limits", {}),
+        # ("openai_output_tokens_only_2000", {'response_tokens_limit': 2000}),
+        # ("openai_output_tokens_only_3000", {'response_tokens_limit': 3000}),
+        # ("openai_max_completion_2000", {'max_completion_tokens': 2000}),
+        # ("openai_max_completion_3000", {'max_completion_tokens': 3000}),
+        # ("openai_total_context_30k_output_2k", {
+        #     'max_tokens': 30000,  # Total context: room for ~21k input + more
+        #     'max_completion_tokens': 2000
+        # }),
+        # ("openai_total_context_50k_output_3k", {
+        #     'max_tokens': 50000,  # Very generous total context
+        #     'max_completion_tokens': 3000
+        # }),
+        # ("openai_all_generous_limits", {
+        #     'response_tokens_limit': 3000,
+        #     'max_completion_tokens': 3000,
+        #     'max_tokens': 50000  # Large enough for input + output
+        # }),
+        ("anthropic_baseline", {'model': 'anthropic:claude-3-haiku-20240307'}),
+        ("anthropic_max_completion_2000", {
+            'model': 'anthropic:claude-3-haiku-20240307',
+            'max_completion_tokens': 2000
+        }),
+        ("anthropic_response_limit_2000", {
+            'model': 'anthropic:claude-3-haiku-20240307',
+            'response_tokens_limit': 2000
+        }),
+    ]
+    
+    for scenario_name, kwargs in test_configs:
+        print(f"Testing scenario: {scenario_name}")
+        try:
+            test_scenario(scenario_name, {
+                'model': 'openai:gpt-4o-mini',
+                'system_prompt': from_file_system_prompt,
+                'output_type': OutputText,
+                **kwargs  # Add the test parameters
+            }, user_prompt)
+            print(f"✓ {scenario_name} completed successfully")
+        except Exception as e:
+            print(f"✗ {scenario_name} failed: {e}")
+        time.sleep(35)
+        print("-" * 50)
 
 if __name__ == '__main__':
     main()
