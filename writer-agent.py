@@ -10,7 +10,7 @@ from pathlib import Path
 load_dotenv(dotenv_path=Path(__file__).parent / '.env')
 
 
-class SummarizerAgent():
+class WriterAgent():
     '''
     The main agent implemented as an MCP client. Uses PydanticAI.
     '''
