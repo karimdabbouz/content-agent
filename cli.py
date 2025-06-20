@@ -1,5 +1,5 @@
 from writer_agent import WriterAgent
-from schemas import InputText, MCPServerConfig, OutputText
+from schemas import MCPServerConfig, OutputText
 import argparse, json, os, datetime
 from system_prompts import from_file_system_prompt
 from input_parser import InputParser
@@ -69,7 +69,7 @@ if __name__ == '__main__':
             user_prompt = input('What would you like me to do? ')
             if user_prompt.strip().lower() == 'exit':
                 break
-            user_prompt_full = agent._construct_prompt(input_data, user_prompt)
+            user_prompt_full = agent._construct_user_prompt(input_data, user_prompt)
             response = agent.run(user_prompt_full)
             if args.write_to_file:
                 write_to_markdown(response.output)

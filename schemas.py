@@ -47,6 +47,10 @@ class OutputText(BaseModel):
     body: List[Paragraph]
 
 
-class SummarizeRequest(BaseModel):
+class FullUserPrompt(BaseModel):
     input_texts: List[InputText]
     user_prompt: str
+
+
+class Outline(BaseModel):
+    paragraphs: List[Paragraph]

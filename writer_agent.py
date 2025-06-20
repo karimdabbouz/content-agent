@@ -2,7 +2,7 @@ import json
 from pydantic_ai import Agent
 from pydantic_ai.mcp import MCPServerHTTP, MCPServerStdio
 from typing import List, Optional
-from schemas import InputText, OutputText, MCPServerConfig
+from schemas import InputText, OutputText, MCPServerConfig, FullUserPrompt
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -42,24 +42,23 @@ class WriterAgent():
         return self.system_prompt
 
     
-    def _construct_prompt(self, input_texts: List[InputText], user_prompt: str):
+    def _construct_user_prompt(self, input_texts: List[InputText], user_prompt: str) -> FullUserPrompt:
         '''
         hier muss der wahrscheinlich die InputText und den User-Prompt zusammenfügen?
         Nimmt mir PydanticAI hier nicht Dinge ab eigentlich?
             -> nur system-prompt/instructions und output-type
         '''
-        user_prompt = {
-            'user_prompt': user_prompt,
-            'input_texts': [x.model_dump() for x in input_texts]
-        }
-        return json.dumps(user_prompt, indent=2, default=str)
+        return FullUserPrompt(
+            user_prompt=user_prompt,
+            input_texts=[x.model_dump() for x in input_texts]
+        )
 
 
-    def run(self, user_prompt: str): # add output type later
+    def run(self, full_user_prompt: FullUserPrompt)-> OutputText:
         '''
         Runs the agent with a list of input texts. Returns the summarized text.
 
         Args:
             - user_prompt: The user prompt (instructions plus input texts)
         '''
-        return self.agent.run_sync(user_prompt)
+        return self.agent.run_sync(json.dumps(full_user_prompt, indent=2, default=str))
