@@ -1,4 +1,4 @@
-# Summarizer Agent
+# Writer Agent
 
 The goal is to build an LLM agent that can accept one or n number of input texts and then flexibly rewrite them into a given format, i.e. a blog post, an article, a newsletter etc.
 
@@ -16,14 +16,14 @@ An agent can be seen as a combination of MCP servers for input and/or output and
 
 ### CLI
 
-The CLI tool is located in `cli.py` and allows you to work with text from files or web searches using the Summarizer Agent. It supports `.txt`, `.md`, and `.json` input files, as well as directories containing multiple files.
+The CLI tool is located in `cli.py` and allows you to work with text from files or web searches using the Writer Agent. It supports `.txt`, `.md`, and `.json` input files, as well as directories containing multiple files.
 
 #### Basic Usage
 
 Run the CLI with:
 
 ```bash
-python summarizer-agent/cli.py [action] [--model-name MODEL] [--mcp-servers JSON] [--write-to-file True|False]
+python content-agent/cli.py [action] [--model-name MODEL] [--mcp-servers JSON] [--write-to-file True|False]
 ```
 
 - `action` (required): Choose between `from-file` or `from-web`
@@ -43,7 +43,7 @@ python summarizer-agent/cli.py [action] [--model-name MODEL] [--mcp-servers JSON
 ##### from-file
 Work with text from one or more files:
 ```bash
-python summarizer-agent/cli.py from-file --file-path PATH [--model-name MODEL] [--mcp-servers JSON] [--write-to-file True|False]
+python content-agent/cli.py from-file --file-path PATH [--model-name MODEL] [--mcp-servers JSON] [--write-to-file True|False]
 ```
 
 - `--file-path`: (required) Path to the input file or directory. Supported formats:
@@ -55,7 +55,7 @@ python summarizer-agent/cli.py from-file --file-path PATH [--model-name MODEL] [
 ##### from-web
 Work with text gathered from a web search (coming soon):
 ```bash
-python summarizer-agent/cli.py from-web [--model-name MODEL] [--mcp-servers JSON] [--write-to-file True|False]
+python content-agent/cli.py from-web [--model-name MODEL] [--mcp-servers JSON] [--write-to-file True|False]
 ```
 
 #### Interactive Workflow
@@ -68,19 +68,19 @@ python summarizer-agent/cli.py from-web [--model-name MODEL] [--mcp-servers JSON
 
 - Work with a single file:
   ```bash
-  python summarizer-agent/cli.py from-file --file-path example_inputs/example_input.txt
+  python content-agent/cli.py from-file --file-path example_inputs/example_input.txt
   # Then enter your prompt, e.g.:
   # What would you like me to do? Summarize this text in 3 bullet points.
   ```
 
 - Work with all files in a directory and save output:
   ```bash
-  python summarizer-agent/cli.py from-file --file-path example_inputs/inputs_txt --write-to-file True
+  python content-agent/cli.py from-file --file-path example_inputs/inputs_txt --write-to-file True
   ```
 
 - Use with an MCP server:
   ```bash
-  python summarizer-agent/cli.py from-file --file-path example_inputs/example_input.txt --mcp-servers '{"transport": "http", "connection": "http://localhost:8000"}'
+  python content-agent/cli.py from-file --file-path example_inputs/example_input.txt --mcp-servers '{"transport": "http", "connection": "http://localhost:8000"}'
   ```
 
 #### Example Input Files

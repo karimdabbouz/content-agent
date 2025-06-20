@@ -13,4 +13,10 @@ class OutlineAgent():
     '''
     An agent that takes a list of one or more InputText objects and returns an outline for repurposed content.
     '''
-    pass
+    def __init__(
+        self,
+        server_configs: Optional[List[MCPServerConfig]],
+        model_name: str,
+        system_prompt: str
+    ):
+        pass

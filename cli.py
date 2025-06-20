@@ -1,4 +1,4 @@
-from summarizer import SummarizerAgent
+from writer_agent import WriterAgent
 from schemas import InputText, MCPServerConfig, OutputText
 import argparse, json, os, datetime
 from system_prompts import from_file_system_prompt
@@ -54,13 +54,13 @@ if __name__ == '__main__':
         if args.mcp_servers:
             servers_list = json.loads(args.mcp_servers)
             mcp_configs = [MCPServerConfig(**server) for server in servers_list]
-            agent = SummarizerAgent(
+            agent = WriterAgent(
                 server_configs=mcp_configs,
                 model_name=args.model_name,
                 system_prompt=from_file_system_prompt
             )
         else:
-            agent = SummarizerAgent(
+            agent = WriterAgent(
                 server_configs=None,
                 model_name=args.model_name,
                 system_prompt=from_file_system_prompt
