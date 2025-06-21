@@ -1,4 +1,5 @@
 from writer_agent import WriterAgent
+from outline_agent import OutlineAgent
 from schemas import MCPServerConfig, OutputText
 import argparse, json, os, datetime
 from system_prompts import from_file_system_prompt

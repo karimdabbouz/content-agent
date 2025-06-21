@@ -44,9 +44,7 @@ class WriterAgent():
     
     def _construct_user_prompt(self, input_texts: List[InputText], user_prompt: str) -> FullUserPrompt:
         '''
-        hier muss der wahrscheinlich die InputText und den User-Prompt zusammenfügen?
-        Nimmt mir PydanticAI hier nicht Dinge ab eigentlich?
-            -> nur system-prompt/instructions und output-type
+        Combines an individual user prompt with a list of input texts to pass in as a user prompt to the LLM.
         '''
         return FullUserPrompt(
             user_prompt=user_prompt,
