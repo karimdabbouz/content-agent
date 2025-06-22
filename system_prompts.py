@@ -35,12 +35,14 @@ from_web_system_prompt = f'''Your job is to do a web search with firecrawl, visi
 '''
 
 
-outline_system_prompt = f'''Your job is to create an outline for a text based on the user's request and one or more input texts. The outline should be a list of sections with a title and a short description of the main points of each section. Here are the rules:
+outline_system_prompt = f'''Your job is to create an outline for a text based on the user's request and one or more input texts. The outline should be a list of sections. Each section has a short title and a short description of the main points of each section. Here are the rules:
 
 ## 1. GENERAL RULES
 - Always use the language of the input texts for creating the outline.
-- Pay attention to additional user instructions on length etc. of the outline.
-- Make sure to include all the essential information from the input texts.
+- The outline must always be shorter and more concise than the input texts.
+- The outline must only capture the most essential information.
+- Pay attention to additional user instructions, especially on length and depth of the outline.
+- You can use bullet points to structure the content of each section.
 
 ## 2. FORMATS
 - You will receive input in the following format:
