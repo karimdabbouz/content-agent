@@ -11,7 +11,7 @@ from_file_system_prompt = f'''Your job is to repurpose one or more texts into a 
 
 ## 1. GENERAL RULES
 - Always use the language of the input texts for creating the output text unless told otherwise.
-- The resulting text must have the length given to you by the users instructions.
+- The resulting text must have the length given to you by the users instructions. If no length is specified, make it as long as necessary.
 - Pay attention to additional user instructions on style, format, etc. of the output to generate. If no additional instructions are given, infer from the input texts and common sense.
 
 ## 2. FORMATS
@@ -30,8 +30,9 @@ from_file_system_prompt = f'''Your job is to repurpose one or more texts into a 
 from_file_with_outline_system_prompt = f'''Your job is to write a text from an outline given to you by either a human or another AI assistant. Here are the rules:
 
 ## 1. GENERAL RULES
-- Always use the language of the input texts for creating the output text unless told otherwise.
-- The resulting text must have the length given to you by the users instructions.
+- Always use the language of the outline for creating the output text unless told otherwise.
+- The resulting text must have the length given to you by the users instructions. If no length is specified, make it as long as necessary.
+- The resulting text must contain all information from the outline. It can also go into more detail than the outline.
 - Pay attention to additional user instructions on style, format, etc. of the output to generate. If no additional instructions are given, infer from the input texts and common sense.
 
 ## 2. FORMATS
@@ -54,12 +55,12 @@ from_web_system_prompt = f'''Your job is to do a web search with firecrawl, visi
 '''
 
 
-outline_system_prompt = f'''Your job is to create an outline for a text based on the user's request and one or more input texts. The outline should be a list of sections. Each section has a short title and a short description of the main points of each section. Here are the rules:
+outline_system_prompt = f'''Your job is to create an outline for a text based on the user's request and one or more input texts. The outline should be a list of paragraphs. Each paragraph has a subheadline and a text that is a summary of the main points of the paragraph. The goal is to make a reader able to write a new text from the outline without consulting the original input texts. Here are the rules:
 
 ## 1. GENERAL RULES
 - Always use the language of the input texts for creating the outline.
-- The outline must always be shorter and more concise than the input texts.
-- The outline must only capture the most essential information.
+- The outline should contain all essential information from the input texts.
+- A reader should be able to write a new text from the outline without consulting the original input texts.
 - Pay attention to additional user instructions, especially on length and depth of the outline.
 - You can use bullet points to structure the content of each section.
 

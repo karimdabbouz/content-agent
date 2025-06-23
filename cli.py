@@ -93,7 +93,7 @@ if __name__ == '__main__':
             else:
                 print(response.output)
     elif args.action == 'from-file-with-outline':
-        # Try passing in the MCP servers into both agents (outline and writer) and let them choose which one
+        # Try passing in the same MCP servers into both agents (outline and writer) and let them choose which one
         # is appropriate to use.
         input_parser = InputParser()
         input_data = input_parser.parse(args.file_path)
@@ -127,8 +127,6 @@ if __name__ == '__main__':
                 break
             user_prompt_outline_full = outline_agent._construct_user_prompt(input_data, user_prompt_outline)
             response_outline = outline_agent.run(user_prompt_outline_full)
-            print(f'Here is the outline: {response_outline.output}')
-            print(type(response_outline.output))
             user_prompt_writer = input('How would you like me to write the content? ')
             if user_prompt_writer.strip().lower() == 'exit':
                 break
@@ -149,13 +147,13 @@ if __name__ == '__main__':
             agent = OutlineAgent(
                 server_configs=mcp_configs,
                 model_name=args.model_name,
-                system_prompt=from_file_system_prompt
+                system_prompt=outline_system_prompt
             )
         else:
             agent = OutlineAgent(
                 server_configs=None,
                 model_name=args.model_name,
-                system_prompt=from_file_system_prompt
+                system_prompt=outline_system_prompt
             )
         while True:
             user_prompt = input('What would you like me to do? ')
