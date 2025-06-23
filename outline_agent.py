@@ -1,7 +1,7 @@
 from pydantic_ai import Agent
 from pydantic_ai.mcp import MCPServerHTTP, MCPServerStdio
 from typing import List, Optional
-from schemas import Outline, MCPServerConfig, FullUserPrompt, InputText
+from schemas import Outline, MCPServerConfig, FullUserPromptInputTexts, InputText
 from dotenv import load_dotenv
 from pathlib import Path
 import json
@@ -43,17 +43,17 @@ class OutlineAgent():
         return self.agent.system_prompt
     
 
-    def _construct_user_prompt(self, input_texts: List[InputText], user_prompt: str) -> FullUserPrompt:
+    def _construct_user_prompt(self, input_texts: List[InputText], user_prompt: str) -> FullUserPromptInputTexts:
         '''
         Combines an individual user prompt with a list of input texts to pass in as a user prompt to the LLM.
         '''
-        return FullUserPrompt(
+        return FullUserPromptInputTexts(
             user_prompt=user_prompt,
             input_texts=[x.model_dump() for x in input_texts]
         )
     
 
-    def run(self, full_user_prompt: FullUserPrompt)-> Outline:
+    def run(self, full_user_prompt: FullUserPromptInputTexts)-> Outline:
         '''
         Runs the agent with a list of input texts. Returns the outline.
         '''

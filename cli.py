@@ -2,7 +2,7 @@ from writer_agent import WriterAgent
 from outline_agent import OutlineAgent
 from schemas import MCPServerConfig, OutputText, Outline
 import argparse, json, os, datetime
-from system_prompts import from_file_system_prompt
+from system_prompts import from_file_system_prompt, from_file_with_outline_system_prompt, outline_system_prompt
 from input_parser import InputParser
 from typing import Union
 
@@ -49,9 +49,13 @@ if __name__ == '__main__':
     from_file_parser = subparsers.add_parser('from-file', help='Work with text from one or more files')
     from_file_parser.add_argument('--file-path', required=True, help='Path to the input file or directory')
 
-    # create-outline
-    create_outline_parser = subparsers.add_parser('create-outline', help='Create an outline from input texts without writing the actual content')
-    create_outline_parser.add_argument('--file-path', required=True, help='Path to the input file or directory')
+    # from-file-with-outline
+    from_file_with_outline_parser = subparsers.add_parser('from-file-with-outline', help='Work with text from one or more files and create an outline first')
+    from_file_with_outline_parser.add_argument('--file-path', required=True, help='Path to the input file or directory')
+
+    # create-outline-only
+    create_outline_only_parser = subparsers.add_parser('create-outline-only', help='Create an outline from input texts without writing the actual content')
+    create_outline_only_parser.add_argument('--file-path', required=True, help='Path to the input file or directory')
 
     # from-web
     from_web_parser = subparsers.add_parser('from-web', help='Work with text gathered from a web search')
@@ -82,15 +86,61 @@ if __name__ == '__main__':
             user_prompt = input('What would you like me to do? ')
             if user_prompt.strip().lower() == 'exit':
                 break
-            user_prompt_full = agent._construct_user_prompt(input_data, user_prompt)
+            user_prompt_full = agent._construct_user_prompt_from_input_texts(input_data, user_prompt)
             response = agent.run(user_prompt_full)
             if args.write_to_file:
                 write_to_markdown(response.output)
             else:
                 print(response.output)
+    elif args.action == 'from-file-with-outline':
+        # Try passing in the MCP servers into both agents (outline and writer) and let them choose which one
+        # is appropriate to use.
+        input_parser = InputParser()
+        input_data = input_parser.parse(args.file_path)
+        if args.mcp_servers:
+            servers_list = json.loads(args.mcp_servers)
+            mcp_configs = [MCPServerConfig(**server) for server in servers_list]
+            outline_agent = OutlineAgent(
+                server_configs=mcp_configs,
+                model_name=args.model_name,
+                system_prompt=outline_system_prompt
+            )
+            writer_agent = WriterAgent(
+                server_configs=mcp_configs,
+                model_name=args.model_name,
+                system_prompt=from_file_with_outline_system_prompt
+            )
+        else:
+            outline_agent = OutlineAgent(
+                server_configs=None,
+                model_name=args.model_name,
+                system_prompt=outline_system_prompt
+            )
+            writer_agent = WriterAgent(
+                server_configs=None,
+                model_name=args.model_name,
+                system_prompt=from_file_with_outline_system_prompt
+            )
+        while True:
+            user_prompt_outline = input('How would you like me to create the outline? ')
+            if user_prompt_outline.strip().lower() == 'exit':
+                break
+            user_prompt_outline_full = outline_agent._construct_user_prompt(input_data, user_prompt_outline)
+            response_outline = outline_agent.run(user_prompt_outline_full)
+            print(f'Here is the outline: {response_outline.output}')
+            print(type(response_outline.output))
+            user_prompt_writer = input('How would you like me to write the content? ')
+            if user_prompt_writer.strip().lower() == 'exit':
+                break
+            user_prompt_writer_full = writer_agent._construct_user_prompt_from_outline(response_outline.output, user_prompt_writer)
+            response_from_writer = writer_agent.run(user_prompt_writer_full)
+            if args.write_to_file:
+                write_to_markdown(response_from_writer.output)
+            else:
+                print(response_from_writer.output)
     elif args.action == 'from-web':
         pass
-    elif args.action == 'create-outline':
+    elif args.action == 'create-outline-only':
         input_parser = InputParser()
         input_data = input_parser.parse(args.file_path)
         if args.mcp_servers:

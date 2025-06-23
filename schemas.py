@@ -47,10 +47,15 @@ class OutputText(BaseModel):
     body: List[Paragraph]
 
 
-class FullUserPrompt(BaseModel):
+class FullUserPromptInputTexts(BaseModel):
     input_texts: List[InputText]
     user_prompt: str
 
 
 class Outline(BaseModel):
     paragraphs: List[Paragraph]
+
+
+class FullUserPromptOutline(BaseModel):
+    outline: Outline
+    user_prompt: str
