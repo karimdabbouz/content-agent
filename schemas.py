@@ -59,3 +59,32 @@ class Outline(BaseModel):
 class FullUserPromptOutline(BaseModel):
     outline: Outline
     user_prompt: str
+
+
+class FromFileRequest(BaseModel):
+    input_texts: List[InputText]
+    user_prompt: str
+    model_name: Optional[str] = None
+    mcp_servers: Optional[List[MCPServerConfig]] = None
+
+
+class FromFileWithOutlineRequest(BaseModel):
+    input_texts: List[InputText]
+    outline_prompt: str
+    content_prompt: str
+    model_name: Optional[str] = None
+    mcp_servers: Optional[List[MCPServerConfig]] = None
+
+
+class CreateOutlineOnlyRequest(BaseModel):
+    input_texts: List[InputText]
+    user_prompt: str
+    model_name: Optional[str] = None
+    mcp_servers: Optional[List[MCPServerConfig]] = None
+
+
+class FromWebRequest(BaseModel):
+    search_terms: str
+    user_prompt: str
+    model_name: Optional[str] = None
+    mcp_servers: Optional[List[MCPServerConfig]] = None
