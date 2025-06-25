@@ -45,12 +45,25 @@ Work with text from one or more files:
 ```bash
 python content-agent/cli.py from-file --file-path PATH [--model-name MODEL] [--mcp-servers JSON] [--write-to-file True|False]
 ```
-
 - `--file-path`: (required) Path to the input file or directory. Supported formats:
   - `.txt`: Plain text
   - `.md`: Markdown
   - `.json`: List of InputText objects (see `example_inputs/example_input.json`)
   - Directory: All supported files inside will be processed
+
+##### from-file-with-outline
+Work with text from one or more files, create an outline first, then generate content from the outline:
+```bash
+python content-agent/cli.py from-file-with-outline --file-path PATH [--model-name MODEL] [--mcp-servers JSON] [--write-to-file True|False]
+```
+- `--file-path`: (required) Path to the input file or directory.
+
+##### create-outline-only
+Create an outline from input texts without writing the actual content:
+```bash
+python content-agent/cli.py create-outline-only --file-path PATH [--model-name MODEL] [--mcp-servers JSON] [--write-to-file True|False]
+```
+- `--file-path`: (required) Path to the input file or directory.
 
 ##### from-web
 Work with text gathered from a web search (coming soon):
@@ -60,7 +73,7 @@ python content-agent/cli.py from-web [--model-name MODEL] [--mcp-servers JSON] [
 
 #### Interactive Workflow
 
-1. After starting the CLI with the appropriate action and arguments, you'll be prompted to enter your instructions.
+1. After starting the CLI with the appropriate action and arguments, you'll be prompted to enter your instructions (and, for from-file-with-outline, to first create an outline, then generate content).
 2. The agent will process your request and display or save the output.
 3. Type `exit` to quit the CLI.
 
@@ -81,6 +94,16 @@ python content-agent/cli.py from-web [--model-name MODEL] [--mcp-servers JSON] [
 - Use with an MCP server:
   ```bash
   python content-agent/cli.py from-file --file-path example_inputs/example_input.txt --mcp-servers '{"transport": "http", "connection": "http://localhost:8000"}'
+  ```
+
+- Create an outline only:
+  ```bash
+  python content-agent/cli.py create-outline-only --file-path example_inputs/example_input.txt
+  ```
+
+- Create an outline and then generate content from it:
+  ```bash
+  python content-agent/cli.py from-file-with-outline --file-path example_inputs/example_input.txt
   ```
 
 #### Example Input Files
