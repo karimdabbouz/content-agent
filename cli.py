@@ -2,7 +2,7 @@ from writer_agent import WriterAgent
 from outline_agent import OutlineAgent
 from schemas import MCPServerConfig, OutputText, Outline
 import argparse, json, os, datetime
-from system_prompts import from_file_system_prompt, from_file_with_outline_system_prompt, outline_system_prompt
+from system_prompts import from_file_system_prompt, from_file_with_outline_system_prompt, outline_system_prompt, from_web_system_prompt
 from input_parser import InputParser
 from typing import Union
 
@@ -137,7 +137,17 @@ if __name__ == '__main__':
             else:
                 print(response_from_writer.output)
     elif args.action == 'from-web':
-        pass
+        if not args.mcp_servers:
+            raise ValueError('A connection to the Firecrawl MCP server is required for from-web')
+        else:
+            servers_list = json.loads(args.mcp_servers)
+            mcp_configs = [MCPServerConfig(**server) for server in servers_list]
+            agent = WriterAgent(
+                server_configs=mcp_configs,
+                model_name=args.model_name,
+                system_prompt=from_web_system_prompt
+            )
+            print(agent)
     elif args.action == 'create-outline-only':
         input_parser = InputParser()
         input_data = input_parser.parse(args.file_path)

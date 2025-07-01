@@ -1,11 +1,10 @@
 from pydantic_ai import Agent
-from pydantic_ai.mcp import MCPServerHTTP, MCPServerStdio
+from pydantic_ai.mcp import MCPServerHTTP, MCPServerStdio, MCPServerSSE
 from typing import List, Optional
 from schemas import Outline, MCPServerConfig, FullUserPromptInputTexts, InputText
 from dotenv import load_dotenv
 from pathlib import Path
 import json
-from system_prompts import outline_system_prompt
 
 
 load_dotenv(dotenv_path=Path(__file__).parent / '.env')
@@ -24,7 +23,7 @@ class OutlineAgent():
         if server_configs is not None:
             self.agent = Agent(
                 model_name,
-                mcp_servers=lambda: [MCPServerHTTP(x.connection) if x.transport == 'http' else MCPServerStdio(x.connection[0], x.connection[1]) for x in server_configs],
+                mcp_servers=lambda: [MCPServerHTTP(x.connection) if x.transport == 'http' else MCPServerStdio(x.connection[0], x.connection[1]) if x.transport == 'stdio' else MCPServerSSE(x.connection) for x in server_configs],
                 system_prompt=system_prompt,
                 output_type=Outline
             )

@@ -7,7 +7,7 @@ class MCPServerConfig(BaseModel):
     '''
     Configurations for MCP servers with either HTTP or Stdio transport.
     '''
-    transport: Literal['stdio', 'http']
+    transport: Literal['stdio', 'http', 'sse']
     connection: Union[Tuple[str, List[str]], str]
 
     @model_validator(mode='after')
@@ -21,6 +21,9 @@ class MCPServerConfig(BaseModel):
                     isinstance(self.connection[0], str) and
                     isinstance(self.connection[1], list)):
                 raise ValueError('For stdio transport, connection must be a tuple (str, list[str])')
+        elif self.transport == 'sse':
+            if not isinstance(self.connection, str):
+                raise ValueError('For sse transport, connection must be a string (server URL)')
         return self
 
 

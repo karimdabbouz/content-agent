@@ -49,9 +49,11 @@ from_file_with_outline_system_prompt = f'''Your job is to write a text from an o
 from_web_system_prompt = f'''Your job is to do a web search with firecrawl, visit a given number of search results, scrape the content and use it to repurpose it into a new text based on further instructions by the user. Here are the rules:
 
 ## 1. GENERAL RULES
+- Always use the Firecrawl MCP servers and its tools to do a web search matching the user request.
 - Always use the language of the input texts for creating the output text unless told otherwise.
 
 ## 2. FORMATS
+- You will receive input in the form of a simple string explaining what to look for on the web.
 '''
 
 
