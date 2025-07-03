@@ -60,9 +60,16 @@ python content-agent/cli.py create-outline-only --file-path PATH [--model-name M
 - `--file-path`: (required) Path to the input file or directory.
 
 ##### from-web
-Work with text gathered from a web search (coming soon):
+Work with text gathered from a web search (requires Firecrawl MCP server):
 ```bash
-python content-agent/cli.py from-web [--model-name MODEL] [--mcp-servers JSON] [--write-to-file True|False]
+python content-agent/cli.py from-web --mcp-servers '{"transport": "sse", "connection": "https://mcp.firecrawl.dev/{FIRECRAWL_API_KEY}/sse"}' [--model-name MODEL] [--write-to-file True|False]
+```
+- Replace `{FIRECRAWL_API_KEY}` with your actual Firecrawl API key.
+- This gives the agent access to the web via Firecrawl using SSE transport.
+
+Example:
+```bash
+python content-agent/cli.py from-web --mcp-servers '{"transport": "sse", "connection": "https://mcp.firecrawl.dev/abc123/sse"}'
 ```
 
 #### Interactive Workflow
