@@ -147,7 +147,18 @@ if __name__ == '__main__':
                 model_name=args.model_name,
                 system_prompt=from_web_system_prompt
             )
-            print(agent)
+            while True:
+                user_prompt = input('What would you like me to do? ')
+                if user_prompt.strip().lower() == 'exit':
+                    break
+                response = agent.run(user_prompt)
+                print(response.output)
+                # user_prompt_full = agent._construct_user_prompt(input_data, user_prompt)
+                # response = agent.run(user_prompt_full)
+                # if args.write_to_file:
+                #     write_to_markdown(response.output)
+                # else:
+                #     print(response.output)
     elif args.action == 'create-outline-only':
         input_parser = InputParser()
         input_data = input_parser.parse(args.file_path)

@@ -21,9 +21,11 @@ class WriterAgent():
         system_prompt: str
     ):
         if server_configs is not None:
+            mcp_servers = self._build_mcp_servers(server_configs)
+            print(mcp_servers)
             self.agent = Agent(
                 model_name,
-                mcp_servers=lambda: [MCPServerHTTP(x.connection) if x.transport == 'http' else MCPServerStdio(x.connection[0], x.connection[1]) if x.transport == 'stdio' else MCPServerSSE(x.connection) for x in server_configs],
+                mcp_servers=mcp_servers,
                 system_prompt=system_prompt,
                 output_type=OutputText
             )
@@ -33,6 +35,13 @@ class WriterAgent():
                 system_prompt=system_prompt,
                 output_type=OutputText
             )
+
+
+    def _build_mcp_servers(self, server_configs: List[MCPServerConfig]):
+        '''
+        Builds MCP servers from a list of server configurations.
+        '''
+        return [MCPServerHTTP(x.connection) if x.transport == 'http' else MCPServerStdio(x.connection[0], x.connection[1]) if x.transport == 'stdio' else MCPServerSSE(url=x.connection) for x in server_configs]
 
 
     def get_system_prompt(self):
@@ -62,8 +71,11 @@ class WriterAgent():
         )
 
 
-    def run(self, full_user_prompt: Union[FullUserPromptInputTexts, FullUserPromptOutline]) -> OutputText:
+    def run(self, full_user_prompt: Union[FullUserPromptInputTexts, FullUserPromptOutline, str]) -> OutputText:
         '''
         Runs the agent with either input texts or an outline. Returns the summarized text.
         '''
-        return self.agent.run_sync(json.dumps(full_user_prompt.model_dump(), indent=2, default=str))
+        if isinstance(full_user_prompt, str):
+            return self.agent.run_sync(full_user_prompt)
+        else:
+            return self.agent.run_sync(json.dumps(full_user_prompt.model_dump(), indent=2, default=str))
