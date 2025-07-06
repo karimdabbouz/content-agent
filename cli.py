@@ -1,7 +1,7 @@
 from writer_agent import WriterAgent
 from outline_agent import OutlineAgent
 from schemas import MCPServerConfig, OutputText, Outline
-import argparse, json, os, datetime
+import argparse, json, os, datetime, asyncio
 from system_prompts import from_file_system_prompt, from_file_with_outline_system_prompt, outline_system_prompt, from_web_system_prompt
 from input_parser import InputParser
 from typing import Union
@@ -36,8 +36,7 @@ def write_to_markdown(output: Union[OutputText, Outline]):
         with open(output_file, 'w', encoding='utf-8') as file:
             file.writelines(lines)
 
-
-if __name__ == '__main__':
+async def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model-name', default='openai:gpt-4o-mini', help='Model name. Default is 4o-mini')
     parser.add_argument('--write-to-file', action='store_true', help='Write outputs to md files. If not set, output will be printed to console.')
@@ -87,7 +86,7 @@ if __name__ == '__main__':
             if user_prompt.strip().lower() == 'exit':
                 break
             user_prompt_full = agent._construct_user_prompt_from_input_texts(input_data, user_prompt)
-            response = agent.run(user_prompt_full)
+            response = await agent.run(user_prompt_full)
             if args.write_to_file:
                 write_to_markdown(response.output)
             else:
@@ -126,12 +125,12 @@ if __name__ == '__main__':
             if user_prompt_outline.strip().lower() == 'exit':
                 break
             user_prompt_outline_full = outline_agent._construct_user_prompt(input_data, user_prompt_outline)
-            response_outline = outline_agent.run(user_prompt_outline_full)
+            response_outline = await outline_agent.run(user_prompt_outline_full)
             user_prompt_writer = input('How would you like me to write the content? ')
             if user_prompt_writer.strip().lower() == 'exit':
                 break
             user_prompt_writer_full = writer_agent._construct_user_prompt_from_outline(response_outline.output, user_prompt_writer)
-            response_from_writer = writer_agent.run(user_prompt_writer_full)
+            response_from_writer = await writer_agent.run(user_prompt_writer_full)
             if args.write_to_file:
                 write_to_markdown(response_from_writer.output)
             else:
@@ -151,7 +150,7 @@ if __name__ == '__main__':
                 user_prompt = input('What would you like me to do? ')
                 if user_prompt.strip().lower() == 'exit':
                     break
-                response = agent.run(user_prompt)
+                response = await agent.run(user_prompt)
                 print(response.output)
                 # user_prompt_full = agent._construct_user_prompt(input_data, user_prompt)
                 # response = agent.run(user_prompt_full)
@@ -181,8 +180,11 @@ if __name__ == '__main__':
             if user_prompt.strip().lower() == 'exit':
                 break
             user_prompt_full = agent._construct_user_prompt(input_data, user_prompt)
-            response = agent.run(user_prompt_full)
+            response = await agent.run(user_prompt_full)
             if args.write_to_file:
                 write_to_markdown(response.output)
             else:
                 print(response.output)
+
+if __name__ == '__main__':
+    asyncio.run(main())

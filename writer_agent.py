@@ -1,5 +1,6 @@
 import json
 from pydantic_ai import Agent
+from pydantic_ai.agent import AgentRunResult
 from pydantic_ai.mcp import MCPServerHTTP, MCPServerStdio, MCPServerSSE
 from typing import List, Optional, Union
 from schemas import InputText, OutputText, MCPServerConfig, FullUserPromptInputTexts, FullUserPromptOutline, Outline
@@ -22,7 +23,6 @@ class WriterAgent():
     ):
         if server_configs is not None:
             mcp_servers = self._build_mcp_servers(server_configs)
-            print(mcp_servers)
             self.agent = Agent(
                 model_name,
                 mcp_servers=mcp_servers,
@@ -71,11 +71,11 @@ class WriterAgent():
         )
 
 
-    def run(self, full_user_prompt: Union[FullUserPromptInputTexts, FullUserPromptOutline, str]) -> OutputText:
+    async def run(self, full_user_prompt: Union[FullUserPromptInputTexts, FullUserPromptOutline, str]) -> AgentRunResult:
         '''
-        Runs the agent with either input texts or an outline. Returns the summarized text.
+        Runs the agent with either input texts, an outline or a web search request (async).
         '''
         if isinstance(full_user_prompt, str):
-            return self.agent.run_sync(full_user_prompt)
+            return await self.agent.run(full_user_prompt)
         else:
-            return self.agent.run_sync(json.dumps(full_user_prompt.model_dump(), indent=2, default=str))
+            return await self.agent.run(json.dumps(full_user_prompt.model_dump(), indent=2, default=str))

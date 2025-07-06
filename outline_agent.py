@@ -1,4 +1,5 @@
 from pydantic_ai import Agent
+from pydantic_ai.agent import AgentRunResult
 from pydantic_ai.mcp import MCPServerHTTP, MCPServerStdio, MCPServerSSE
 from typing import List, Optional
 from schemas import Outline, MCPServerConfig, FullUserPromptInputTexts, InputText
@@ -21,9 +22,10 @@ class OutlineAgent():
         system_prompt: str
     ):
         if server_configs is not None:
+            mcp_servers = self._build_mcp_servers(server_configs)
             self.agent = Agent(
                 model_name,
-                mcp_servers=lambda: [MCPServerHTTP(x.connection) if x.transport == 'http' else MCPServerStdio(x.connection[0], x.connection[1]) if x.transport == 'stdio' else MCPServerSSE(x.connection) for x in server_configs],
+                mcp_servers=mcp_servers,
                 system_prompt=system_prompt,
                 output_type=Outline
             )
@@ -33,6 +35,13 @@ class OutlineAgent():
                 system_prompt=system_prompt,
                 output_type=Outline
             )
+
+
+    def _build_mcp_servers(self, server_configs: List[MCPServerConfig]):
+        '''
+        Builds MCP servers from a list of server configurations.
+        '''
+        return [MCPServerHTTP(x.connection) if x.transport == 'http' else MCPServerStdio(x.connection[0], x.connection[1]) if x.transport == 'stdio' else MCPServerSSE(url=x.connection) for x in server_configs]
     
 
     def get_system_prompt(self):
@@ -52,8 +61,8 @@ class OutlineAgent():
         )
     
 
-    def run(self, full_user_prompt: FullUserPromptInputTexts)-> Outline:
+    async def run(self, full_user_prompt: FullUserPromptInputTexts) -> AgentRunResult:
         '''
-        Runs the agent with a list of input texts. Returns the outline.
+        Runs the agent with a list of input texts. Returns the outline (async).
         '''
-        return self.agent.run_sync(json.dumps(full_user_prompt.model_dump(), indent=2, default=str))
+        return await self.agent.run(json.dumps(full_user_prompt.model_dump(), indent=2, default=str))
