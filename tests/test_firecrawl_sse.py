@@ -15,6 +15,7 @@ if not FIRECRAWL_API_KEY:
 FIRECRAWL_URL = f'https://mcp.firecrawl.dev/{FIRECRAWL_API_KEY}/sse'
 
 server = MCPServerSSE(url=FIRECRAWL_URL)
+print(server)
 agent = Agent('openai:gpt-4o-mini', mcp_servers=[server], output_type=OutputText)
 
 async def main():

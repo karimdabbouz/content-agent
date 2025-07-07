@@ -21,6 +21,7 @@ class WriterAgent():
         model_name: str,
         system_prompt: str
     ):
+        self.server_configs = server_configs
         if server_configs is not None:
             mcp_servers = self._build_mcp_servers(server_configs)
             self.agent = Agent(
@@ -75,7 +76,11 @@ class WriterAgent():
         '''
         Runs the agent with either input texts, an outline or a web search request (async).
         '''
-        if isinstance(full_user_prompt, str):
-            return await self.agent.run(full_user_prompt)
+        if self.server_configs:
+            with self.agent.run_mcp_servers():
+                return await self.agent.run(full_user_prompt)
         else:
-            return await self.agent.run(json.dumps(full_user_prompt.model_dump(), indent=2, default=str))
+            if isinstance(full_user_prompt, str):
+                return await self.agent.run(full_user_prompt)
+            else:
+                return await self.agent.run(json.dumps(full_user_prompt.model_dump(), indent=2, default=str))
