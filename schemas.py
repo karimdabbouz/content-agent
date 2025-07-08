@@ -5,7 +5,7 @@ import datetime
 
 class MCPServerConfig(BaseModel):
     '''
-    Configurations for MCP servers with either HTTP or Stdio transport.
+    Configurations for MCP servers with either HTTP, Stdio or SSE transport.
     '''
     transport: Literal['stdio', 'http', 'sse']
     connection: Union[Tuple[str, List[str]], str]
@@ -37,6 +37,10 @@ class Paragraph(BaseModel):
     text: str
 
 
+class Outline(BaseModel):
+    paragraphs: List[Paragraph]
+
+
 class InputText(BaseModel):
     metadata: InputTextMetadata
     headline: Optional[str] = None
@@ -55,14 +59,12 @@ class FullUserPromptInputTexts(BaseModel):
     user_prompt: str
 
 
-class Outline(BaseModel):
-    paragraphs: List[Paragraph]
-
-
 class FullUserPromptOutline(BaseModel):
     outline: Outline
     user_prompt: str
 
+
+# API request schemas | Important: they will most likely be extended in the future so no duplicates of FullUserPrompt types
 
 class FromFileRequest(BaseModel):
     input_texts: List[InputText]

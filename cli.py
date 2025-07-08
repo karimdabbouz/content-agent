@@ -47,10 +47,7 @@ async def main():
     # from-file
     from_file_parser = subparsers.add_parser('from-file', help='Work with text from one or more files')
     from_file_parser.add_argument('--file-path', required=True, help='Path to the input file or directory')
-
-    # from-file-with-outline
-    from_file_with_outline_parser = subparsers.add_parser('from-file-with-outline', help='Work with text from one or more files and create an outline first')
-    from_file_with_outline_parser.add_argument('--file-path', required=True, help='Path to the input file or directory')
+    from_file_parser.add_argument('--with-outline', action='store_true', help='Create an outline first, then generate content from the outline')
 
     # create-outline-only
     create_outline_only_parser = subparsers.add_parser('create-outline-only', help='Create an outline from input texts without writing the actual content')
@@ -58,47 +55,20 @@ async def main():
 
     # from-web
     from_web_parser = subparsers.add_parser('from-web', help='Work with text gathered from a web search')
+    from_web_parser.add_argument('--with-outline', action='store_true', help='Create an outline first, then generate content from the outline (dummy for now)')
 
     args = parser.parse_args()
 
     if args.action == 'from-file':
-        # --mcp-servers '{"transport": "http", "server_urls": ["http://localhost:8000"]}'
-        # --mcp-servers '[{"transport": "http", "connection": "http://localhost:8000"}, {"transport": "stdio", "connection": ["/usr/bin/firecrawl", ["--arg1", "foo"]]}]'
-        # --mcp-servers '{"transport": "stdio", "stdio_commands": [["/usr/bin/mycmd", ["--arg1", "foo"]]]}'
         input_parser = InputParser()
         input_data = input_parser.parse(args.file_path)
         if args.mcp_servers:
             servers_list = json.loads(args.mcp_servers)
             mcp_configs = [MCPServerConfig(**server) for server in servers_list]
-            agent = WriterAgent(
-                server_configs=mcp_configs,
-                model_name=args.model_name,
-                system_prompt=from_file_system_prompt
-            )
         else:
-            agent = WriterAgent(
-                server_configs=None,
-                model_name=args.model_name,
-                system_prompt=from_file_system_prompt
-            )
-        while True:
-            user_prompt = input('What would you like me to do? ')
-            if user_prompt.strip().lower() == 'exit':
-                break
-            user_prompt_full = agent._construct_user_prompt_from_input_texts(input_data, user_prompt)
-            response = await agent.run(user_prompt_full)
-            if args.write_to_file:
-                write_to_markdown(response.output)
-            else:
-                print(response.output)
-    elif args.action == 'from-file-with-outline':
-        # Try passing in the same MCP servers into both agents (outline and writer) and let them choose which one
-        # is appropriate to use.
-        input_parser = InputParser()
-        input_data = input_parser.parse(args.file_path)
-        if args.mcp_servers:
-            servers_list = json.loads(args.mcp_servers)
-            mcp_configs = [MCPServerConfig(**server) for server in servers_list]
+            mcp_configs = None
+        if args.with_outline:
+            # Outline + writer workflow
             outline_agent = OutlineAgent(
                 server_configs=mcp_configs,
                 model_name=args.model_name,
@@ -109,38 +79,48 @@ async def main():
                 model_name=args.model_name,
                 system_prompt=from_file_with_outline_system_prompt
             )
+            while True:
+                user_prompt_outline = input('How would you like me to create the outline? ')
+                if user_prompt_outline.strip().lower() == 'exit':
+                    break
+                user_prompt_outline_full = outline_agent._construct_user_prompt(input_data, user_prompt_outline)
+                response_outline = await outline_agent.run(user_prompt_outline_full)
+                user_prompt_writer = input('How would you like me to write the content? ')
+                if user_prompt_writer.strip().lower() == 'exit':
+                    break
+                user_prompt_writer_full = writer_agent._construct_user_prompt_from_outline(response_outline.output, user_prompt_writer)
+                response_from_writer = await writer_agent.run(user_prompt_writer_full)
+                if args.write_to_file:
+                    write_to_markdown(response_from_writer.output)
+                else:
+                    print(response_from_writer.output)
         else:
-            outline_agent = OutlineAgent(
-                server_configs=None,
+            # Writer only workflow
+            agent = WriterAgent(
+                server_configs=mcp_configs,
                 model_name=args.model_name,
-                system_prompt=outline_system_prompt
+                system_prompt=from_file_system_prompt
             )
-            writer_agent = WriterAgent(
-                server_configs=None,
-                model_name=args.model_name,
-                system_prompt=from_file_with_outline_system_prompt
-            )
-        while True:
-            user_prompt_outline = input('How would you like me to create the outline? ')
-            if user_prompt_outline.strip().lower() == 'exit':
-                break
-            user_prompt_outline_full = outline_agent._construct_user_prompt(input_data, user_prompt_outline)
-            response_outline = await outline_agent.run(user_prompt_outline_full)
-            user_prompt_writer = input('How would you like me to write the content? ')
-            if user_prompt_writer.strip().lower() == 'exit':
-                break
-            user_prompt_writer_full = writer_agent._construct_user_prompt_from_outline(response_outline.output, user_prompt_writer)
-            response_from_writer = await writer_agent.run(user_prompt_writer_full)
-            if args.write_to_file:
-                write_to_markdown(response_from_writer.output)
-            else:
-                print(response_from_writer.output)
+            while True:
+                user_prompt = input('What would you like me to do? ')
+                if user_prompt.strip().lower() == 'exit':
+                    break
+                user_prompt_full = agent._construct_user_prompt_from_input_texts(input_data, user_prompt)
+                response = await agent.run(user_prompt_full)
+                if args.write_to_file:
+                    write_to_markdown(response.output)
+                else:
+                    print(response.output)
     elif args.action == 'from-web':
         if not args.mcp_servers:
             raise ValueError('A connection to the Firecrawl MCP server is required for from-web')
         else:
             servers_list = json.loads(args.mcp_servers)
             mcp_configs = [MCPServerConfig(**server) for server in servers_list]
+        if args.with_outline:
+            print('from-web with --with-outline is not yet implemented. This is a placeholder.')
+            # Placeholder for future implementation
+        else:
             agent = WriterAgent(
                 server_configs=mcp_configs,
                 model_name=args.model_name,
@@ -152,29 +132,19 @@ async def main():
                     break
                 response = await agent.run(user_prompt)
                 print(response.output)
-                # user_prompt_full = agent._construct_user_prompt(input_data, user_prompt)
-                # response = agent.run(user_prompt_full)
-                # if args.write_to_file:
-                #     write_to_markdown(response.output)
-                # else:
-                #     print(response.output)
     elif args.action == 'create-outline-only':
         input_parser = InputParser()
         input_data = input_parser.parse(args.file_path)
         if args.mcp_servers:
             servers_list = json.loads(args.mcp_servers)
             mcp_configs = [MCPServerConfig(**server) for server in servers_list]
-            agent = OutlineAgent(
-                server_configs=mcp_configs,
-                model_name=args.model_name,
-                system_prompt=outline_system_prompt
-            )
         else:
-            agent = OutlineAgent(
-                server_configs=None,
-                model_name=args.model_name,
-                system_prompt=outline_system_prompt
-            )
+            mcp_configs = None
+        agent = OutlineAgent(
+            server_configs=mcp_configs,
+            model_name=args.model_name,
+            system_prompt=outline_system_prompt
+        )
         while True:
             user_prompt = input('What would you like me to do? ')
             if user_prompt.strip().lower() == 'exit':

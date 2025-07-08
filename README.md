@@ -37,13 +37,14 @@ python content-agent/cli.py [action] [--model-name MODEL] [--mcp-servers JSON] [
 ##### from-file
 Work with text from one or more files:
 ```bash
-python content-agent/cli.py from-file --file-path PATH [--model-name MODEL] [--mcp-servers JSON] [--write-to-file True|False]
+python content-agent/cli.py from-file --file-path PATH [--with-outline] [--model-name MODEL] [--mcp-servers JSON] [--write-to-file True|False]
 ```
 - `--file-path`: (required) Path to the input file or directory. Supported formats:
   - `.txt`: Plain text
   - `.md`: Markdown
   - `.json`: List of InputText objects (see `example_inputs/example_input.json`)
   - Directory: All supported files inside will be processed
+- `--with-outline`: (optional) If set, the agent will first create an outline, then generate content from the outline (interactive workflow).
 
 ##### from-file-with-outline
 Work with text from one or more files, create an outline first, then generate content from the outline:
@@ -62,14 +63,15 @@ python content-agent/cli.py create-outline-only --file-path PATH [--model-name M
 ##### from-web
 Work with text gathered from a web search (requires Firecrawl MCP server):
 ```bash
-python content-agent/cli.py from-web --mcp-servers '{"transport": "sse", "connection": "https://mcp.firecrawl.dev/{FIRECRAWL_API_KEY}/sse"}' [--model-name MODEL] [--write-to-file True|False]
+python content-agent/cli.py from-web --mcp-servers '{"transport": "sse", "connection": "https://mcp.firecrawl.dev/{FIRECRAWL_API_KEY}/sse"}' [--with-outline] [--model-name MODEL] [--write-to-file True|False]
 ```
 - Replace `{FIRECRAWL_API_KEY}` with your actual Firecrawl API key.
 - This gives the agent access to the web via Firecrawl using SSE transport.
+- `--with-outline`: (optional) If set, the agent will (in the future) first create an outline, then generate content from the outline. (Currently a placeholder.)
 
 Example:
 ```bash
-python content-agent/cli.py from-web --mcp-servers '{"transport": "sse", "connection": "https://mcp.firecrawl.dev/abc123/sse"}'
+python content-agent/cli.py from-web --mcp-servers '{"transport": "sse", "connection": "https://mcp.firecrawl.dev/abc123/sse"}' --with-outline
 ```
 
 #### Interactive Workflow
@@ -83,6 +85,8 @@ python content-agent/cli.py from-web --mcp-servers '{"transport": "sse", "connec
 - Work with a single file:
   ```bash
   python content-agent/cli.py from-file --file-path example_inputs/example_input.txt
+  # Or, with outline:
+  python content-agent/cli.py from-file --file-path example_inputs/example_input.txt --with-outline
   # Then enter your prompt, e.g.:
   # What would you like me to do? Summarize this text in 3 bullet points.
   ```

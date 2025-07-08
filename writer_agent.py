@@ -77,7 +77,7 @@ class WriterAgent():
         Runs the agent with either input texts, an outline or a web search request (async).
         '''
         if self.server_configs:
-            with self.agent.run_mcp_servers():
+            async with self.agent.run_mcp_servers():
                 return await self.agent.run(full_user_prompt)
         else:
             if isinstance(full_user_prompt, str):
