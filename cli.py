@@ -131,7 +131,10 @@ async def main():
                 if user_prompt.strip().lower() == 'exit':
                     break
                 response = await agent.run(user_prompt)
-                print(response.output)
+                if args.write_to_file:
+                    write_to_markdown(response.output)
+                else:
+                    print(response.output)
     elif args.action == 'create-outline-only':
         input_parser = InputParser()
         input_data = input_parser.parse(args.file_path)
