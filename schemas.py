@@ -30,6 +30,7 @@ class MCPServerConfig(BaseModel):
 class InputTextMetadata(BaseModel):
     created_at: Optional[datetime.datetime] = None
     num_words: Optional[int] = None
+    source: Optional[str] = None
 
 
 class Paragraph(BaseModel):
