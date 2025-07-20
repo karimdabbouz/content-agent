@@ -2,6 +2,7 @@ import json
 from pydantic_ai import Agent
 from pydantic_ai.agent import AgentRunResult
 from pydantic_ai.mcp import MCPServerHTTP, MCPServerStdio, MCPServerSSE
+from pydantic import BaseModel
 from typing import List, Optional, Union
 from schemas import InputText, OutputText, MCPServerConfig, FullUserPromptInputTexts, FullUserPromptOutline, Outline
 from dotenv import load_dotenv
@@ -19,22 +20,24 @@ class WriterAgent():
         self,
         server_configs: Optional[List[MCPServerConfig]],
         model_name: str,
-        system_prompt: str
+        system_prompt: str,
+        output_type: type = OutputText
     ):
         self.server_configs = server_configs
+        self.output_type = output_type
         if server_configs is not None:
             mcp_servers = self._build_mcp_servers(server_configs)
             self.agent = Agent(
                 model_name,
                 mcp_servers=mcp_servers,
                 system_prompt=system_prompt,
-                output_type=OutputText
+                output_type=output_type
             )
         else:
             self.agent = Agent(
                 model_name,
                 system_prompt=system_prompt,
-                output_type=OutputText
+                output_type=output_type
             )
 
 
