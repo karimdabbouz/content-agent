@@ -1,6 +1,9 @@
-import os, sys, json
+import os, sys, json, time, logfire
 from pathlib import Path
 from typing import List
+import logging
+
+# logging.basicConfig(level=logging.DEBUG)
 
 # Add content-agent/ to sys.path
 project_root = str(Path(__file__).resolve().parent.parent.parent)
@@ -10,6 +13,13 @@ import asyncio
 from dotenv import load_dotenv
 from writer_agent import WriterAgent
 from schemas import MCPServerConfig, InputText, OutputText
+
+load_dotenv()
+
+LOGFIRE_TOKEN = os.getenv('LOGFIRE_TOKEN')
+logfire.configure(token=LOGFIRE_TOKEN)
+logfire.instrument_pydantic_ai()
+logfire.instrument_httpx(capture_all=True)
 
 output_text_schema = json.dumps({
     "type": "array",
@@ -26,14 +36,14 @@ system_prompt = f'''
 Your job is to do a web search with firecrawl, visit a given number of search results, scrape the content and parse it into the specified output format.
 
 ## 1. GENERAL RULES
-- Always use the Firecrawl MCP servers and its tools to do a web search matching the user request.
-- For the output texts always use the language specified in the user prompt even if the web search results are in a different language.
+- Always use the Firecrawl MCP server and its tools to do a web search matching the user request.
+- For the output texts always use the language specified in the user prompt even if the web search results are in a different language. If the content is in a different language, translate it.
 
 ## 2. FORMATS
-- You will receive input in the form of a simple string written by the user specifying the maximum number of search results to retrieve and the subject to search for.
-- You must always deliver output in the following format:
-{output_text_schema}
+- You will receive input in the form of a simple string written by the user specifying the maximum number of search results to retrieve and the subject to search for as well as other important information.
 '''
+# - You must always deliver output in the following format:
+# {output_text_schema}
 
 load_dotenv()
 FIRECRAWL_API_KEY = os.getenv('FIRECRAWL_API_KEY')
@@ -42,12 +52,28 @@ if not FIRECRAWL_API_KEY:
 FIRECRAWL_URL = f'https://mcp.firecrawl.dev/{FIRECRAWL_API_KEY}/sse'
 
 MCP_CONFIGS = [
-    MCPServerConfig(transport='sse', connection=FIRECRAWL_URL)
+    MCPServerConfig(transport='http', connection=FIRECRAWL_URL)
 ]
 
 async def process_product(product_title, agent):
-    prompt = f'Return a list of reviews for the product: {product_title}. Each review should be a JSON object matching the InputText schema.'
+    # prompt = f'Suche online nach maximal 3 Reviews zu folgendem Produkt: {product_title}. Lies jedes Review, übersetze den Inhalt auf Deutsch und formatiere ihn im angegebenen Format.'
+    # prompt = f'Suche online nach maximal 3 deutschsprachigen Reviews oder Erfahrungsberichten zu folgendem Produkt: {product_title}. Stelle sicher, dass es sich um unabhängige Reviews handelt und nicht um Produktbeschreibungen von Händlern oder vom Hersteller. Besuche die Reviews und scrape den Inhalt. Formatiere ihn anschließend im angegebenen Format.'
+    prompt = f'Suche online nach maximal 3 deutschsprachigen Reviews oder Erfahrungsberichten zu folgendem Produkt: {product_title}. Stelle sicher, dass es sich um unabhängige Reviews handelt und nicht um Produktbeschreibungen von Händlern oder vom Hersteller. Besuche die Reviews, scrape den Inhalt und fasse ihn für mich zusammen.'
     try:
+
+
+# server = MCPServerSSE(url=FIRECRAWL_URL)
+# print(server)
+# agent = Agent('openai:gpt-4o-mini', mcp_servers=[server], output_type=OutputText)
+
+# async def main():
+#     async with agent.run_mcp_servers():
+#         result = await agent.run('do a web search for product reviews on the lego set with number 10329 named tiny plants. visit exactly 3 reviews, read them and use the information to write a new review.')
+#     print(result.output)
+
+# if __name__ == '__main__':
+#     asyncio.run(main()) 
+
         result = await agent.run(prompt)
         reviews = result.output  # Should be a list of InputText
         safe_title = product_title.replace(' ', '_').replace('/', '_')
@@ -69,20 +95,21 @@ async def main():
     with open(INPUT_FILE, 'r', encoding='utf-8') as f:
         products = [line.strip() for line in f if line.strip()]
     print(f'Loaded {len(products)} product titles.')
-    print(system_prompt)
 
     # Set up the agent to output List[InputText] objects
     agent = WriterAgent(
         server_configs=MCP_CONFIGS,
         model_name='openai:gpt-4o-mini',
         system_prompt=system_prompt,
-        output_type=List[InputText]
+        output_type=None
+        # output_type=List[InputText]
     )
 
     # Process each product sequentially
     for idx, product in enumerate(products, 1):
         print(f'Processing {idx}/{len(products)}: {product}')
         await process_product(product, agent)
+        time.sleep(60)
 
 if __name__ == '__main__':
     asyncio.run(main()) 

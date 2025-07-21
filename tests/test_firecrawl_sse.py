@@ -1,5 +1,6 @@
 import sys
 import os
+import logfire
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from pydantic_ai import Agent
@@ -9,14 +10,21 @@ from dotenv import load_dotenv
 from schemas import OutputText
 
 load_dotenv()
+
+LOGFIRE_TOKEN = os.getenv('LOGFIRE_TOKEN')
+logfire.configure(token=LOGFIRE_TOKEN)
+logfire.instrument_pydantic_ai()
+logfire.instrument_httpx(capture_all=True)
+
 FIRECRAWL_API_KEY = os.getenv('FIRECRAWL_API_KEY')
 if not FIRECRAWL_API_KEY:
     raise ValueError('FIRECRAWL_API_KEY not found in .env')
 FIRECRAWL_URL = f'https://mcp.firecrawl.dev/{FIRECRAWL_API_KEY}/sse'
 
 server = MCPServerSSE(url=FIRECRAWL_URL)
+# server = MCPServerHTTP(url=FIRECRAWL_URL)
 print(server)
-agent = Agent('openai:gpt-4o-mini', mcp_servers=[server], output_type=OutputText)
+agent = Agent('openai:gpt-4o-mini', mcp_servers=[server], output_type=None)
 
 async def main():
     async with agent.run_mcp_servers():
