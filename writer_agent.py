@@ -1,7 +1,7 @@
 import json
 from pydantic_ai import Agent
 from pydantic_ai.agent import AgentRunResult
-from pydantic_ai.mcp import MCPServerHTTP, MCPServerStdio, MCPServerSSE
+from pydantic_ai.mcp import MCPServerStreamableHTTP, MCPServerStdio, MCPServerSSE
 from pydantic import BaseModel
 from typing import List, Optional, Union
 from schemas import InputText, OutputText, MCPServerConfig, FullUserPromptInputTexts, FullUserPromptOutline, Outline
@@ -45,7 +45,7 @@ class WriterAgent():
         '''
         Builds MCP servers from a list of server configurations.
         '''
-        return [MCPServerHTTP(x.connection) if x.transport == 'http' else MCPServerStdio(x.connection[0], x.connection[1]) if x.transport == 'stdio' else MCPServerSSE(url=x.connection) for x in server_configs]
+        return [MCPServerStreamableHTTP(x.connection) if x.transport == 'http' else MCPServerStdio(x.connection[0], x.connection[1]) if x.transport == 'stdio' else MCPServerSSE(url=x.connection) for x in server_configs]
 
 
     def get_system_prompt(self):

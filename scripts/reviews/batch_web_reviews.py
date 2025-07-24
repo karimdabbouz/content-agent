@@ -52,7 +52,7 @@ if not FIRECRAWL_API_KEY:
 FIRECRAWL_URL = f'https://mcp.firecrawl.dev/{FIRECRAWL_API_KEY}/sse'
 
 MCP_CONFIGS = [
-    MCPServerConfig(transport='http', connection=FIRECRAWL_URL)
+    MCPServerConfig(transport='stdio', connection=('npx', ['-y', 'firecrawl-mcp']))
 ]
 
 async def process_product(product_title, agent):
@@ -60,22 +60,8 @@ async def process_product(product_title, agent):
     # prompt = f'Suche online nach maximal 3 deutschsprachigen Reviews oder Erfahrungsberichten zu folgendem Produkt: {product_title}. Stelle sicher, dass es sich um unabhängige Reviews handelt und nicht um Produktbeschreibungen von Händlern oder vom Hersteller. Besuche die Reviews und scrape den Inhalt. Formatiere ihn anschließend im angegebenen Format.'
     prompt = f'Suche online nach maximal 3 deutschsprachigen Reviews oder Erfahrungsberichten zu folgendem Produkt: {product_title}. Stelle sicher, dass es sich um unabhängige Reviews handelt und nicht um Produktbeschreibungen von Händlern oder vom Hersteller. Besuche die Reviews, scrape den Inhalt und fasse ihn für mich zusammen.'
     try:
-
-
-# server = MCPServerSSE(url=FIRECRAWL_URL)
-# print(server)
-# agent = Agent('openai:gpt-4o-mini', mcp_servers=[server], output_type=OutputText)
-
-# async def main():
-#     async with agent.run_mcp_servers():
-#         result = await agent.run('do a web search for product reviews on the lego set with number 10329 named tiny plants. visit exactly 3 reviews, read them and use the information to write a new review.')
-#     print(result.output)
-
-# if __name__ == '__main__':
-#     asyncio.run(main()) 
-
         result = await agent.run(prompt)
-        reviews = result.output  # Should be a list of InputText
+        reviews = result.output
         safe_title = product_title.replace(' ', '_').replace('/', '_')
         product_dir = OUTPUTS_DIR / safe_title
         os.makedirs(product_dir, exist_ok=True)
@@ -101,8 +87,7 @@ async def main():
         server_configs=MCP_CONFIGS,
         model_name='openai:gpt-4o-mini',
         system_prompt=system_prompt,
-        output_type=None
-        # output_type=List[InputText]
+        output_type=List[InputText]
     )
 
     # Process each product sequentially
