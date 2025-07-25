@@ -9,6 +9,7 @@ class MCPServerConfig(BaseModel):
     '''
     transport: Literal['stdio', 'http', 'sse']
     connection: Union[Tuple[str, List[str]], str]
+    env: Optional[dict] = None
 
     @model_validator(mode='after')
     def check_connection_type(self):

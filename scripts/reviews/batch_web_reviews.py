@@ -1,9 +1,6 @@
 import os, sys, json, time, logfire
 from pathlib import Path
 from typing import List
-import logging
-
-# logging.basicConfig(level=logging.DEBUG)
 
 # Add content-agent/ to sys.path
 project_root = str(Path(__file__).resolve().parent.parent.parent)
@@ -33,17 +30,17 @@ OUTPUTS_DIR = SCRIPT_DIR / 'outputs'  # Output directory for review files
 
 # Custom system prompt for review extraction
 system_prompt = f'''
-Your job is to do a web search with firecrawl, visit a given number of search results, scrape the content and parse it into the specified output format.
+Your job is to do a web search for product reviews by independent sources. It is your responsibility to assess whether a source is independent or not. You will then get the content of this product review and return it in the structured format specified below.
 
 ## 1. GENERAL RULES
 - Always use the Firecrawl MCP server and its tools to do a web search matching the user request.
-- For the output texts always use the language specified in the user prompt even if the web search results are in a different language. If the content is in a different language, translate it.
+- For the output texts always use the language specified in the user prompt even if the product review is in a different language. If the review is in a different language, translate it into the language requested by the user.
 
 ## 2. FORMATS
-- You will receive input in the form of a simple string written by the user specifying the maximum number of search results to retrieve and the subject to search for as well as other important information.
+- You will receive input in the form of a simple string written by the user specifying the maximum number of search results to retrieve and the product to search for as well as other important information.
+- You must always deliver output in the following format:
+{output_text_schema}
 '''
-# - You must always deliver output in the following format:
-# {output_text_schema}
 
 load_dotenv()
 FIRECRAWL_API_KEY = os.getenv('FIRECRAWL_API_KEY')
@@ -52,13 +49,15 @@ if not FIRECRAWL_API_KEY:
 FIRECRAWL_URL = f'https://mcp.firecrawl.dev/{FIRECRAWL_API_KEY}/sse'
 
 MCP_CONFIGS = [
-    MCPServerConfig(transport='stdio', connection=('npx', ['-y', 'firecrawl-mcp']))
+    MCPServerConfig(
+        transport='stdio',
+        connection=('npx', ['-y', 'firecrawl-mcp']),
+        env={'FIRECRAWL_API_KEY': FIRECRAWL_API_KEY}
+    )
 ]
 
 async def process_product(product_title, agent):
-    # prompt = f'Suche online nach maximal 3 Reviews zu folgendem Produkt: {product_title}. Lies jedes Review, übersetze den Inhalt auf Deutsch und formatiere ihn im angegebenen Format.'
-    # prompt = f'Suche online nach maximal 3 deutschsprachigen Reviews oder Erfahrungsberichten zu folgendem Produkt: {product_title}. Stelle sicher, dass es sich um unabhängige Reviews handelt und nicht um Produktbeschreibungen von Händlern oder vom Hersteller. Besuche die Reviews und scrape den Inhalt. Formatiere ihn anschließend im angegebenen Format.'
-    prompt = f'Suche online nach maximal 3 deutschsprachigen Reviews oder Erfahrungsberichten zu folgendem Produkt: {product_title}. Stelle sicher, dass es sich um unabhängige Reviews handelt und nicht um Produktbeschreibungen von Händlern oder vom Hersteller. Besuche die Reviews, scrape den Inhalt und fasse ihn für mich zusammen.'
+    prompt = f'Suche online nach Reviews oder Erfahrungsberichten zu folgendem Produkt: {product_title}. Wähle genau 3 Reviews aus und stelle sicher, dass es sich um unabhängige Reviews handelt und nicht um Produktbeschreibungen von Händlern oder vom Hersteller. Formatiere die Reviews im angegebenen Format.'
     try:
         result = await agent.run(prompt)
         reviews = result.output

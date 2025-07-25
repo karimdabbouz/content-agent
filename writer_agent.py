@@ -45,7 +45,7 @@ class WriterAgent():
         '''
         Builds MCP servers from a list of server configurations.
         '''
-        return [MCPServerStreamableHTTP(x.connection) if x.transport == 'http' else MCPServerStdio(x.connection[0], x.connection[1]) if x.transport == 'stdio' else MCPServerSSE(url=x.connection) for x in server_configs]
+        return [MCPServerStreamableHTTP(x.connection) if x.transport == 'http' else MCPServerStdio(x.connection[0], x.connection[1], x.env) if x.transport == 'stdio' else MCPServerSSE(url=x.connection) for x in server_configs]
 
 
     def get_system_prompt(self):
